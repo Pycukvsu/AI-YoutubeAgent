@@ -49,4 +49,14 @@ public class TrendService {
             }
         }
     }
+
+    public Trend findOrCreateTrend(String topic, String source, String category) {
+        return trendRepository.findByTopicIgnoreCaseAndStatus(topic, "new")
+                .orElseGet(() -> {
+                    Trend trend = new Trend(topic, source);
+                    trend.setCategory(category);
+                    trend.setDiscoveredAt(LocalDateTime.now());
+                    return trendRepository.save(trend);
+                });
+    }
 }

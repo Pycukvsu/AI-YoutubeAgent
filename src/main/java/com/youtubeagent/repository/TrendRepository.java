@@ -9,4 +9,5 @@ public interface TrendRepository extends JpaRepository<Trend, Long> {
     List<Trend> findByStatusOrderByDiscoveredAtDesc(String status);
     Optional<Trend> findFirstByStatusOrderBySearchVolumeDesc(String status);
     long countByStatus(String status);
+    Optional<Trend> findByTopicIgnoreCaseAndStatus(String topic, String status);
 }

@@ -108,4 +108,41 @@ public class OpenAiService {
             throw new ExternalServiceException("OpenAI", e);
         }
     }
+
+    public Map<String, Object> callOpenAi(String prompt, int maxTokens) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(config.getApiKey());
+
+            Map<String, Object> body = Map.of(
+                    "model", config.getModel(),
+                    "messages", new Object[]{
+                            Map.of("role", "user", "content", prompt)
+                    },
+                    "temperature", config.getTemperature(),
+                    "max_tokens", maxTokens,
+                    "response_format", Map.of("type", "json_object")
+            );
+
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    config.getBaseUrl() + "/chat/completions",
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            JsonNode root = objectMapper.readTree(response.getBody());
+            String content = root.path("choices").get(0).path("message").path("content").asText();
+            int tokensUsed = root.path("usage").path("total_tokens").asInt(0);
+
+            return Map.of("content", content, "tokensUsed", tokensUsed);
+
+        } catch (Exception e) {
+            log.error("OpenAI call failed: {}", e.getMessage());
+            throw new ExternalServiceException("OpenAI", e);
+        }
+    }
 }

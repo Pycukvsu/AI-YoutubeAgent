@@ -67,3 +67,18 @@ scheduling:
 
 analytics:
   refresh-interval-hours: 24
+
+trend-discovery:
+  topics-per-run: 10
+  language: ru
+  categories:
+    - technology
+    - science
+    - history
+    - psychology
+    - facts
+    - space
+    - nature
+  min-viral-score: 7
+  enable-youtube-search: true
+  enable-openai-generation: true
