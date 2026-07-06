@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:youtube_agent}
+
+logging:
+  level:
+    com.youtubeagent: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

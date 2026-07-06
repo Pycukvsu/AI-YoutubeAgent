@@ -1,0 +1,69 @@
+spring:
+  application:
+    name: youtube-agent
+  datasource:
+    url: jdbc:postgresql://localhost:5432/youtube_agent
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
+
+pipeline:
+  retry:
+    max-attempts: 3
+    backoff-ms: 5000
+  temp-dir: /tmp/youtube-agent
+  music-dir: classpath:music
+  max-concurrent: 2
+
+openai:
+  api-key: ${OPENAI_API_KEY:}
+  model: gpt-4o
+  temperature: 0.8
+  max-tokens: 500
+  base-url: https://api.openai.com/v1
+
+pexels:
+  api-key: ${PEXELS_API_KEY:}
+  base-url: https://api.pexels.com
+  clips-per-video: 4
+  min-duration-seconds: 5
+
+edge-tts:
+  python-path: python3
+  wrapper-script: scripts/edge_tts_wrapper.py
+  voice: ru-RU-DmitryNeural
+  rate: "+0%"
+
+ffmpeg:
+  path: ffmpeg
+  video-codec: libx264
+  audio-codec: aac
+  width: 1080
+  height: 1920
+  crf: 23
+
+youtube:
+  client-id: ${YOUTUBE_CLIENT_ID:}
+  client-secret: ${YOUTUBE_CLIENT_SECRET:}
+  refresh-token: ${YOUTUBE_REFRESH_TOKEN:}
+  channel-id: ${YOUTUBE_CHANNEL_ID:}
+  default-category: "22"
+  default-visibility: PRIVATE
+
+scheduling:
+  trend-cron: "0 6 * * *"
+  video-cron: "0 10,14,18 * * *"
+  analytics-cron: "0 2 * * *"
+
+analytics:
+  refresh-interval-hours: 24
