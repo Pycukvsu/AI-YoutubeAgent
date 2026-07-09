@@ -25,20 +25,8 @@ services:
         value: validate
       - key: SPRING_FLYWAY_ENABLED
         value: "true"
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: PEXELS_API_KEY
-        sync: false
-      - key: YOUTUBE_CLIENT_ID
-        sync: false
-      - key: YOUTUBE_CLIENT_SECRET
-        sync: false
-      - key: YOUTUBE_REFRESH_TOKEN
-        sync: false
-      - key: YOUTUBE_CHANNEL_ID
-        sync: false
 
-  - type: pgsql
-    name: youtube-agent-db
+databases:
+  - name: youtube-agent-db
     plan: free
-    database: youtube_agent
+    databaseName: youtube_agent
