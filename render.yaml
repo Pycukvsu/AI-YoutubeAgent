@@ -1,8 +1,8 @@
 services:
   - type: web
     name: youtube-agent
+    runtime: docker
     plan: free
-    dockerfilePath: ./Dockerfile
     healthCheckPath: /actuator/health
     envVars:
       - key: SPRING_DATASOURCE_URL
