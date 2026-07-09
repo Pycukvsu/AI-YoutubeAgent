@@ -32,6 +32,10 @@ openai:
   max-tokens: 500
   base-url: https://api.openai.com/v1
 
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: gemini-2.0-flash
+
 pexels:
   api-key: ${PEXELS_API_KEY:}
   base-url: https://api.pexels.com

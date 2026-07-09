@@ -6,13 +6,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class OpenAiServiceTest {
+
+    @Mock
+    private GeminiService geminiService;
 
     private OpenAiService openAiService;
 
@@ -24,7 +27,7 @@ class OpenAiServiceTest {
         config.setBaseUrl("https://api.openai.com/v1");
         config.setMaxTokens(500);
 
-        openAiService = new OpenAiService(config, new ObjectMapper());
+        openAiService = new OpenAiService(config, geminiService, new ObjectMapper());
     }
 
     @Test

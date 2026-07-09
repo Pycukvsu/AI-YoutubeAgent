@@ -20,11 +20,13 @@ public class OpenAiService {
     private static final Logger log = LoggerFactory.getLogger(OpenAiService.class);
 
     private final OpenAiConfig config;
+    private final GeminiService geminiService;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    public OpenAiService(OpenAiConfig config, ObjectMapper objectMapper) {
+    public OpenAiService(OpenAiConfig config, GeminiService geminiService, ObjectMapper objectMapper) {
         this.config = config;
+        this.geminiService = geminiService;
         this.restTemplate = new RestTemplate();
         this.objectMapper = objectMapper;
     }
@@ -54,33 +56,10 @@ public class OpenAiService {
                 Целевая длительность: %d секунд
                 """.formatted(request.getTopic(), request.getTone(), request.getTargetDurationSeconds());
 
+        String fullPrompt = systemPrompt + "\n\n" + userPrompt;
+
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(config.getApiKey());
-
-            Map<String, Object> body = Map.of(
-                    "model", config.getModel(),
-                    "messages", new Object[]{
-                            Map.of("role", "system", "content", systemPrompt),
-                            Map.of("role", "user", "content", userPrompt)
-                    },
-                    "temperature", config.getTemperature(),
-                    "max_tokens", config.getMaxTokens(),
-                    "response_format", Map.of("type", "json_object")
-            );
-
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                    config.getBaseUrl() + "/chat/completions",
-                    HttpMethod.POST,
-                    entity,
-                    String.class
-            );
-
-            JsonNode root = objectMapper.readTree(response.getBody());
-            String content = root.path("choices").get(0).path("message").path("content").asText();
+            String content = callAi(fullPrompt, 800);
             JsonNode scriptJson = objectMapper.readTree(content);
 
             ScriptResponse result = new ScriptResponse();
@@ -98,51 +77,63 @@ public class OpenAiService {
                 result.setTags(tags);
             }
 
-            int tokensUsed = root.path("usage").path("total_tokens").asInt(0);
-            log.info("Generated script for topic '{}', tokens used: {}", request.getTopic(), tokensUsed);
-
+            log.info("Generated script for topic '{}'", request.getTopic());
             return result;
 
         } catch (Exception e) {
             log.error("Failed to generate script: {}", e.getMessage());
-            throw new ExternalServiceException("OpenAI", e);
+            throw new ExternalServiceException("AI", e);
         }
     }
 
     public Map<String, Object> callOpenAi(String prompt, int maxTokens) {
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(config.getApiKey());
-
-            Map<String, Object> body = Map.of(
-                    "model", config.getModel(),
-                    "messages", new Object[]{
-                            Map.of("role", "user", "content", prompt)
-                    },
-                    "temperature", config.getTemperature(),
-                    "max_tokens", maxTokens,
-                    "response_format", Map.of("type", "json_object")
-            );
-
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                    config.getBaseUrl() + "/chat/completions",
-                    HttpMethod.POST,
-                    entity,
-                    String.class
-            );
-
-            JsonNode root = objectMapper.readTree(response.getBody());
-            String content = root.path("choices").get(0).path("message").path("content").asText();
-            int tokensUsed = root.path("usage").path("total_tokens").asInt(0);
-
-            return Map.of("content", content, "tokensUsed", tokensUsed);
-
+            String content = callAi(prompt, maxTokens);
+            return Map.of("content", content, "tokensUsed", 0);
         } catch (Exception e) {
-            log.error("OpenAI call failed: {}", e.getMessage());
-            throw new ExternalServiceException("OpenAI", e);
+            log.error("AI call failed: {}", e.getMessage());
+            throw new ExternalServiceException("AI", e);
         }
+    }
+
+    private String callAi(String prompt, int maxTokens) throws Exception {
+        if (geminiService.isConfigured()) {
+            log.info("Using Gemini API");
+            Map<String, Object> result = geminiService.callGemini(prompt, maxTokens);
+            return (String) result.get("content");
+        }
+
+        if (config.getApiKey() != null && !config.getApiKey().isBlank()
+                && !config.getApiKey().equals("demo")) {
+            log.info("Using OpenAI API");
+            return callOpenAiDirect(prompt, maxTokens);
+        }
+
+        throw new ExternalServiceException("AI", "No AI provider configured. Set GEMINI_API_KEY or OPENAI_API_KEY.");
+    }
+
+    private String callOpenAiDirect(String prompt, int maxTokens) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(config.getApiKey());
+
+        Map<String, Object> body = Map.of(
+                "model", config.getModel(),
+                "messages", new Object[]{
+                        Map.of("role", "user", "content", prompt)
+                },
+                "temperature", config.getTemperature(),
+                "max_tokens", maxTokens,
+                "response_format", Map.of("type", "json_object")
+        );
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                config.getBaseUrl() + "/chat/completions",
+                HttpMethod.POST, entity, String.class);
+
+        JsonNode root = objectMapper.readTree(response.getBody());
+        return root.path("choices").get(0).path("message").path("content").asText();
     }
 }
