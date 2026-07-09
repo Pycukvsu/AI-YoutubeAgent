@@ -29,7 +29,7 @@ public class PipelineRun {
     private LocalDateTime startedAt = LocalDateTime.now();
     private LocalDateTime completedAt;
 
-    @Column(columnDefinition = "jsonb")
+    @Column(columnDefinition = "text")
     private String stagesJson;
 
     public PipelineRun() {}

@@ -22,7 +22,7 @@ public class EnhancedAnalyticsController {
         return ResponseEntity.ok(analyticsService.getChannelOverview());
     }
 
-    @GetMapping("/video/{videoId}")
+    @GetMapping("/video/{videoId}/performance")
     public ResponseEntity<Map<String, Object>> getVideoPerformance(@PathVariable Long videoId) {
         return ResponseEntity.ok(analyticsService.getVideoPerformance(videoId));
     }

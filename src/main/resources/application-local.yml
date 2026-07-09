@@ -1,0 +1,78 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:youtube_agent;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+
+server:
+  port: 8080
+
+pipeline:
+  retry:
+    max-attempts: 1
+    backoff-ms: 1000
+  temp-dir: /tmp/youtube-agent
+  max-concurrent: 1
+
+openai:
+  api-key: ${OPENAI_API_KEY:demo}
+  model: gpt-4o
+  temperature: 0.8
+  max-tokens: 500
+  base-url: https://api.openai.com/v1
+
+pexels:
+  api-key: ${PEXELS_API_KEY:demo}
+  base-url: https://api.pexels.com
+  clips-per-video: 4
+  min-duration-seconds: 5
+
+edge-tts:
+  python-path: python3
+  wrapper-script: scripts/edge_tts_wrapper.py
+  voice: ru-RU-DmitryNeural
+  rate: "+0%"
+
+ffmpeg:
+  path: ffmpeg
+  video-codec: libx264
+  audio-codec: aac
+  width: 1080
+  height: 1920
+  crf: 23
+
+youtube:
+  client-id: demo
+  client-secret: demo
+  refresh-token: demo
+  channel-id: demo
+  default-category: "22"
+  default-visibility: PRIVATE
+
+scheduling:
+  trend-cron: "0 0 6 * * *"
+  video-cron: "0 0 10,14,18 * * *"
+  analytics-cron: "0 0 2 * * *"
+
+analytics:
+  refresh-interval-hours: 24
+
+trend-discovery:
+  topics-per-run: 5
+  language: ru
+  categories:
+    - technology
+    - science
+  min-viral-score: 7
+  enable-youtube-search: false
+  enable-openai-generation: false
+  enable-google-trends: false

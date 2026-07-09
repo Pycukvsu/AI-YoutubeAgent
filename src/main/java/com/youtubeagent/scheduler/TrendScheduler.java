@@ -20,7 +20,7 @@ public class TrendScheduler {
         this.trendService = trendService;
     }
 
-    @Scheduled(cron = "${scheduling.trend-cron:0 6 * * *}")
+    @Scheduled(cron = "${scheduling.trend-cron:0 0 6 * * *}")
     public void discoverTrends() {
         log.info("Scheduled trend discovery started");
         int newTrends = trendDiscoveryService.discoverTrends();

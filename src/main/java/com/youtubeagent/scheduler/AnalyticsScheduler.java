@@ -17,7 +17,7 @@ public class AnalyticsScheduler {
         this.analyticsService = analyticsService;
     }
 
-    @Scheduled(cron = "${scheduling.analytics-cron:0 2 * * *}")
+    @Scheduled(cron = "${scheduling.analytics-cron:0 0 2 * * *}")
     public void refreshAnalytics() {
         log.info("Scheduled analytics refresh started");
         analyticsService.refreshAllAnalytics();

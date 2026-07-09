@@ -28,7 +28,7 @@ public class VideoGenerationScheduler {
         this.trendService = trendService;
     }
 
-    @Scheduled(cron = "${scheduling.video-cron:0 10,14,18 * * *}")
+    @Scheduled(cron = "${scheduling.video-cron:0 0 10,14,18 * * *}")
     public void generateVideos() {
         log.info("Scheduled video generation started");
 

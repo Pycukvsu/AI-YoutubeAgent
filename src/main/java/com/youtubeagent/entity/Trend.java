@@ -22,7 +22,7 @@ public class Trend {
     @Column(length = 100)
     private String category;
 
-    @Column(columnDefinition = "jsonb")
+    @Column(columnDefinition = "text")
     private String rawData;
 
     @Column(length = 20)

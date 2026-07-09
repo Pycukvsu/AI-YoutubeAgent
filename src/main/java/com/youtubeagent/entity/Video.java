@@ -21,8 +21,8 @@ public class Video {
     @Column(columnDefinition = "text")
     private String description;
 
-    @Column(columnDefinition = "text[]")
-    private String[] tags;
+    @Column(columnDefinition = "text")
+    private String tags;
 
     @Column(length = 50)
     private String youtubeId;
@@ -70,8 +70,21 @@ public class Video {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String[] getTags() { return tags; }
-    public void setTags(String[] tags) { this.tags = tags; }
+    public String getTags() { return tags; }
+    public void setTags(String tags) { this.tags = tags; }
+
+    public String[] getTagsArray() {
+        if (tags == null || tags.isBlank()) return new String[0];
+        return tags.split(",");
+    }
+
+    public void setTagsArray(String[] tagsArray) {
+        if (tagsArray == null) {
+            this.tags = null;
+        } else {
+            this.tags = String.join(",", tagsArray);
+        }
+    }
 
     public String getYoutubeId() { return youtubeId; }
     public void setYoutubeId(String youtubeId) { this.youtubeId = youtubeId; }

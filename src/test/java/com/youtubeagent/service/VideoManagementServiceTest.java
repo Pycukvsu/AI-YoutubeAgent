@@ -77,7 +77,7 @@ class VideoManagementServiceTest {
         Video video = new Video("My Video", trend);
         video.setId(10L);
         video.setDescription("A description");
-        video.setTags(new String[]{"tag1", "tag2"});
+        video.setTagsArray(new String[]{"tag1", "tag2"});
         video.setStatus("generating");
         video.setYoutubeId("yt123");
         video.setYoutubeUrl("https://youtube.com/shorts/yt123");
