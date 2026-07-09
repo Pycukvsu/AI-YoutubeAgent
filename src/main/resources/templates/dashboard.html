@@ -56,12 +56,13 @@
         <div class="stats">
             <div class="stat-card"><h3>Видео</h3><div class="value red" id="totalVideos">-</div></div>
             <div class="stat-card"><h3>Загружено</h3><div class="value green" id="uploadedVideos">-</div></div>
-            <div class="stat-card"><h3>Тренды</h3><div class="value blue" id="totalTrends">-</div></div>
             <div class="stat-card"><h3>Просмотры</h3><div class="value yellow" id="totalViews">-</div></div>
+            <div class="stat-card"><h3>Engagement</h3><div class="value blue" id="engagementRate">-</div></div>
         </div>
 
         <div class="actions">
             <button class="btn btn-primary" onclick="startPipeline()">Создать видео</button>
+            <button class="btn btn-secondary" onclick="createAbTest()">A/B Тест</button>
             <button class="btn btn-secondary" onclick="refreshData()">Обновить</button>
         </div>
 
@@ -77,8 +78,8 @@
         </div>
 
         <div class="section">
-            <h2>Активные пайплайны</h2>
-            <div id="pipelinesList"><div class="loading">Загрузка...</div></div>
+            <h2>A/B Тесты</h2>
+            <div id="abTestsList"><div class="loading">Загрузка...</div></div>
         </div>
     </div>
 
@@ -160,8 +161,75 @@
             }
         }
 
+        async function loadAnalytics() {
+            try {
+                const r = await fetch(API + '/api/analytics/overview');
+                const data = await r.json();
+                document.getElementById('totalViews').textContent = (data.totalViews || 0).toLocaleString();
+                document.getElementById('engagementRate').textContent = (data.engagementRate || 0) + '%';
+            } catch (e) {}
+        }
+
+        async function loadAbTests() {
+            try {
+                const r = await fetch(API + '/api/ab-tests/active');
+                const tests = await r.json();
+
+                if (tests.length === 0) {
+                    document.getElementById('abTestsList').innerHTML = '<div class="empty">Нет активных тестов</div>';
+                    return;
+                }
+
+                const html = '<table><tr><th>Название</th><th>Тип</th><th>Статус</th><th>Действие</th></tr>' +
+                    tests.map(t => `<tr>
+                        <td>${t.name}</td>
+                        <td>${t.testType}</td>
+                        <td><span class="badge ${t.status}">${t.status}</span></td>
+                        <td><button class="btn btn-secondary" onclick="analyzeTest(${t.id})">Анализ</button></td>
+                    </tr>`).join('') + '</table>';
+                document.getElementById('abTestsList').innerHTML = html;
+            } catch (e) {
+                document.getElementById('abTestsList').innerHTML = '<div class="empty">Ошибка загрузки</div>';
+            }
+        }
+
+        async function analyzeTest(testId) {
+            try {
+                const r = await fetch(API + '/api/ab-tests/' + testId + '/analyze');
+                const data = await r.json();
+                let msg = 'Тест: ' + data.name + '\nПобедитель: ' + (data.winner || '-') + '\n\n';
+                if (data.variants) {
+                    data.variants.forEach(v => {
+                        msg += v.name + ': ' + v.videoCount + ' видео, ' + v.totalViews + ' просмотров, ' + v.engagementRate + '% engagement\n';
+                    });
+                }
+                alert(msg);
+            } catch (e) {
+                alert('Ошибка анализа: ' + e.message);
+            }
+        }
+
+        async function createAbTest() {
+            const name = prompt('Название теста:');
+            if (!name) return;
+            const variants = prompt('Варианты (через запятую):');
+            if (!variants) return;
+
+            try {
+                await fetch(API + '/api/ab-tests/title', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name, variants: variants.split(',').map(s => s.trim())})
+                });
+                alert('Тест создан!');
+                loadAbTests();
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        }
+
         async function refreshData() {
-            await Promise.all([loadVideos(), loadTrends()]);
+            await Promise.all([loadVideos(), loadTrends(), loadAnalytics(), loadAbTests()]);
         }
 
         checkStatus();
