@@ -1,14 +1,10 @@
 services:
   - type: web
     name: youtube-agent
-    runtime: java
     plan: free
-    buildCommand: mvn clean package -DskipTests
-    startCommand: java -jar target/youtube-agent-0.1.0-SNAPSHOT.jar --spring.profiles.active=prod
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /actuator/health
     envVars:
-      - key: JAVA_VERSION
-        value: 21
       - key: SPRING_DATASOURCE_URL
         fromDatabase:
           name: youtube-agent-db
