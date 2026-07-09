@@ -16,6 +16,9 @@ RUN apk add --no-cache python3 py3-pip ffmpeg && \
 
 COPY --from=builder /app/target/*.jar app.jar
 
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["/start.sh"]
