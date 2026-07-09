@@ -2,13 +2,10 @@ package com.youtubeagent.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.youtubeagent.config.OpenAiConfig;
 import com.youtubeagent.exception.ExternalServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
@@ -17,13 +14,11 @@ public class SeoService {
 
     private static final Logger log = LoggerFactory.getLogger(SeoService.class);
 
-    private final OpenAiConfig config;
-    private final RestTemplate restTemplate;
+    private final OpenAiService openAiService;
     private final ObjectMapper objectMapper;
 
-    public SeoService(OpenAiConfig config, ObjectMapper objectMapper) {
-        this.config = config;
-        this.restTemplate = new RestTemplate();
+    public SeoService(OpenAiService openAiService, ObjectMapper objectMapper) {
+        this.openAiService = openAiService;
         this.objectMapper = objectMapper;
     }
 
@@ -52,33 +47,10 @@ public class SeoService {
                     - Хештеги: 5-8 штук, популярные + нишевые
                     - Ключевые слова: что ищут люди в YouTube
                     - Избегай спама и перенасыщения ключевиками
-                    """;
+                    """.formatted(language, topic);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(config.getApiKey());
-
-            Map<String, Object> body = Map.of(
-                    "model", config.getModel(),
-                    "messages", new Object[]{
-                            Map.of("role", "user", "content", prompt)
-                    },
-                    "temperature", 0.7,
-                    "max_tokens", 800,
-                    "response_format", Map.of("type", "json_object")
-            );
-
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                    config.getBaseUrl() + "/chat/completions",
-                    HttpMethod.POST,
-                    entity,
-                    String.class
-            );
-
-            JsonNode root = objectMapper.readTree(response.getBody());
-            String content = root.path("choices").get(0).path("message").path("content").asText();
+            Map<String, Object> aiResult = openAiService.callOpenAi(prompt, 800);
+            String content = (String) aiResult.get("content");
             JsonNode seoJson = objectMapper.readTree(content);
 
             SeoResult result = new SeoResult();
@@ -114,10 +86,7 @@ public class SeoService {
                 result.setTips(tips);
             }
 
-            int tokensUsed = root.path("usage").path("total_tokens").asInt(0);
-            log.info("SEO optimization complete for '{}', score: {}, tokens: {}",
-                    topic, result.getSeoScore(), tokensUsed);
-
+            log.info("SEO optimization complete for '{}', score: {}", topic, result.getSeoScore());
             return result;
 
         } catch (Exception e) {
@@ -136,31 +105,8 @@ public class SeoService {
                     Формат: {"titles": ["заголовок1", "заголовок2", ...]}
                     """.formatted(count, topic);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(config.getApiKey());
-
-            Map<String, Object> body = Map.of(
-                    "model", config.getModel(),
-                    "messages", new Object[]{
-                            Map.of("role", "user", "content", prompt)
-                    },
-                    "temperature", 0.9,
-                    "max_tokens", 500,
-                    "response_format", Map.of("type", "json_object")
-            );
-
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                    config.getBaseUrl() + "/chat/completions",
-                    HttpMethod.POST,
-                    entity,
-                    String.class
-            );
-
-            JsonNode root = objectMapper.readTree(response.getBody());
-            String content = root.path("choices").get(0).path("message").path("content").asText();
+            Map<String, Object> aiResult = openAiService.callOpenAi(prompt, 500);
+            String content = (String) aiResult.get("content");
             JsonNode json = objectMapper.readTree(content);
 
             List<String> titles = new ArrayList<>();

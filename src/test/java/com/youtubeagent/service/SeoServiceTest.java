@@ -4,10 +4,19 @@ import com.youtubeagent.config.OpenAiConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class SeoServiceTest {
+
+    @Mock
+    private GeminiService geminiService;
+    @Mock
+    private GroqService groqService;
 
     private SeoService seoService;
 
@@ -19,7 +28,8 @@ class SeoServiceTest {
         config.setBaseUrl("https://api.openai.com/v1");
         config.setMaxTokens(800);
 
-        seoService = new SeoService(config, new ObjectMapper());
+        OpenAiService openAiService = new OpenAiService(config, geminiService, groqService, new ObjectMapper());
+        seoService = new SeoService(openAiService, new ObjectMapper());
     }
 
     @Test
