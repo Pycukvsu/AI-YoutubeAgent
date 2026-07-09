@@ -1,0 +1,8 @@
+.git
+.gitignore
+.idea
+.mimocode
+target/
+*.md
+docker-compose.yml
+render.yaml

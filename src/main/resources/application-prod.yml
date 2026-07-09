@@ -1,6 +1,16 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:youtube_agent}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/youtube_agent}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
 
 logging:
   level:
@@ -11,3 +21,6 @@ management:
     web:
       exposure:
         include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

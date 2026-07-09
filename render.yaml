@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: youtube-agent
+    runtime: java
+    plan: free
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/youtube-agent-0.1.0-SNAPSHOT.jar --spring.profiles.active=prod
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: JAVA_VERSION
+        value: 21
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: youtube-agent-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: youtube-agent-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: youtube-agent-db
+          property: password
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: validate
+      - key: SPRING_FLYWAY_ENABLED
+        value: "true"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PEXELS_API_KEY
+        sync: false
+      - key: YOUTUBE_CLIENT_ID
+        sync: false
+      - key: YOUTUBE_CLIENT_SECRET
+        sync: false
+      - key: YOUTUBE_REFRESH_TOKEN
+        sync: false
+      - key: YOUTUBE_CHANNEL_ID
+        sync: false
+
+  - type: pgsql
+    name: youtube-agent-db
+    plan: free
+    database: youtube_agent
