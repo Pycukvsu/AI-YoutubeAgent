@@ -15,7 +15,7 @@ public class Script {
     @JoinColumn(name = "video_id", nullable = false)
     private Video video;
 
-    @Column(nullable = false, columnDefinition = "text")
+    @Column(nullable = false)
     private String content;
 
     private Integer wordCount;

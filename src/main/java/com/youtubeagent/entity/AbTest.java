@@ -23,10 +23,10 @@ public class AbTest {
     @Column(nullable = false, length = 50)
     private String testType;
 
-    @Column(columnDefinition = "text")
+    @Column
     private String variantsJson;
 
-    @Column(columnDefinition = "text")
+    @Column
     private String resultsJson;
 
     private LocalDateTime createdAt = LocalDateTime.now();

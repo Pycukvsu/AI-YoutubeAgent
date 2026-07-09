@@ -18,10 +18,10 @@ public class Video {
     @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(columnDefinition = "text")
+    @Column
     private String description;
 
-    @Column(columnDefinition = "text")
+    @Column
     private String tags;
 
     @Column(length = 50)

@@ -21,7 +21,7 @@ public class PipelineRun {
     @Column(length = 20)
     private String status = "running";
 
-    @Column(columnDefinition = "text")
+    @Column
     private String errorMessage;
 
     private Integer retryCount = 0;
@@ -29,7 +29,7 @@ public class PipelineRun {
     private LocalDateTime startedAt = LocalDateTime.now();
     private LocalDateTime completedAt;
 
-    @Column(columnDefinition = "text")
+    @Column
     private String stagesJson;
 
     public PipelineRun() {}
