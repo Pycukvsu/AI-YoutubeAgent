@@ -61,9 +61,9 @@ youtube:
   default-visibility: PRIVATE
 
 scheduling:
-  trend-cron: "0 6 * * *"
-  video-cron: "0 10,14,18 * * *"
-  analytics-cron: "0 2 * * *"
+  trend-cron: "0 0 6 * * *"
+  video-cron: "0 0 10,14,18 * * *"
+  analytics-cron: "0 0 2 * * *"
 
 analytics:
   refresh-interval-hours: 24
