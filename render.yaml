@@ -26,3 +26,4 @@ databases:
   - name: youtube-agent-db
     plan: free
     databaseName: youtube_agent
+    ipAllowList: []
