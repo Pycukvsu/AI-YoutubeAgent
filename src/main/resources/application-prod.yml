@@ -6,12 +6,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        schema_validation: false
-        validation_mode: none
+      ddl-auto: none
   flyway:
     enabled: true
 
