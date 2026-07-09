@@ -30,7 +30,7 @@ public class VideoManagementService {
         dto.setId(video.getId());
         dto.setTitle(video.getTitle());
         dto.setDescription(video.getDescription());
-        dto.setTags(video.getTags());
+        dto.setTags(video.getTagsArray());
         dto.setStatus(video.getStatus());
         dto.setYoutubeId(video.getYoutubeId());
         dto.setYoutubeUrl(video.getYoutubeUrl());

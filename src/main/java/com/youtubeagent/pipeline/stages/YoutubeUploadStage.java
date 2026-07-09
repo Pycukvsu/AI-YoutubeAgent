@@ -52,7 +52,7 @@ public class YoutubeUploadStage implements PipelineStage {
                     video.getFilePath(),
                     video.getTitle(),
                     video.getDescription(),
-                    video.getTags()
+                    video.getTagsArray()
             );
 
             video.setYoutubeId(result.videoId());

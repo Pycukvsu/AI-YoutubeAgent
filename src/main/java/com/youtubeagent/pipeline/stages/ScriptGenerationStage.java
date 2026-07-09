@@ -66,7 +66,7 @@ public class ScriptGenerationStage implements PipelineStage {
                     if (!allTags.contains(tag)) allTags.add(tag);
                 }
             }
-            video.setTags(allTags.toArray(new String[0]));
+            video.setTagsArray(allTags.toArray(new String[0]));
 
             videoRepository.save(video);
 
