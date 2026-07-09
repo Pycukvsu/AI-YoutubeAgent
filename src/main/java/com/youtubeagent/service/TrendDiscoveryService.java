@@ -23,6 +23,7 @@ public class TrendDiscoveryService {
     private final TrendDiscoveryConfig config;
     private final OpenAiService openAiService;
     private final YoutubeUploadService youtubeUploadService;
+    private final GoogleTrendsService googleTrendsService;
     private final TrendRepository trendRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -30,11 +31,13 @@ public class TrendDiscoveryService {
     public TrendDiscoveryService(TrendDiscoveryConfig config,
                                   OpenAiService openAiService,
                                   YoutubeUploadService youtubeUploadService,
+                                  GoogleTrendsService googleTrendsService,
                                   TrendRepository trendRepository,
                                   ObjectMapper objectMapper) {
         this.config = config;
         this.openAiService = openAiService;
         this.youtubeUploadService = youtubeUploadService;
+        this.googleTrendsService = googleTrendsService;
         this.trendRepository = trendRepository;
         this.restTemplate = new RestTemplate();
         this.objectMapper = objectMapper;
@@ -49,6 +52,10 @@ public class TrendDiscoveryService {
 
         if (config.isEnableYoutubeSearch()) {
             totalNew += discoverFromYouTube();
+        }
+
+        if (config.isEnableGoogleTrends()) {
+            totalNew += discoverFromGoogleTrends();
         }
 
         log.info("Trend discovery complete: {} new trends found", totalNew);
@@ -181,6 +188,28 @@ public class TrendDiscoveryService {
         if (cleaned.length() < 5 || cleaned.length() > 100) return null;
 
         return cleaned;
+    }
+
+    private int discoverFromGoogleTrends() {
+        try {
+            String topicsRaw = googleTrendsService.fetchTrends(config.getLanguage().toUpperCase(), config.getTopicsPerRun());
+            String[] topics = topicsRaw.split("\n");
+
+            int newCount = 0;
+            for (String topic : topics) {
+                topic = topic.trim();
+                if (!topic.isEmpty() && findOrCreateTrend(topic, "google_trends", "trending")) {
+                    newCount++;
+                }
+            }
+
+            log.info("Google Trends discovery: {} new trends", newCount);
+            return newCount;
+
+        } catch (Exception e) {
+            log.error("Google Trends discovery failed: {}", e.getMessage());
+            return 0;
+        }
     }
 
     public boolean findOrCreateTrend(String topic, String source, String category) {

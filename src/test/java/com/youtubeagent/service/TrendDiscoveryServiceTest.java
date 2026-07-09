@@ -14,7 +14,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +23,8 @@ class TrendDiscoveryServiceTest {
     private OpenAiService openAiService;
     @Mock
     private YoutubeUploadService youtubeUploadService;
+    @Mock
+    private GoogleTrendsService googleTrendsService;
     @Mock
     private TrendRepository trendRepository;
 
@@ -38,9 +39,11 @@ class TrendDiscoveryServiceTest {
         config.setMinViralScore(7);
         config.setEnableOpenAiGeneration(false);
         config.setEnableYoutubeSearch(false);
+        config.setEnableGoogleTrends(false);
 
         trendDiscoveryService = new TrendDiscoveryService(
-                config, openAiService, youtubeUploadService, trendRepository, new ObjectMapper());
+                config, openAiService, youtubeUploadService, googleTrendsService,
+                trendRepository, new ObjectMapper());
     }
 
     @Test

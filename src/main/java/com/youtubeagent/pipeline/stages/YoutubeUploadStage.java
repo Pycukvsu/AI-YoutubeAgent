@@ -4,6 +4,7 @@ import com.youtubeagent.entity.Video;
 import com.youtubeagent.pipeline.PipelineContext;
 import com.youtubeagent.pipeline.PipelineStage;
 import com.youtubeagent.pipeline.PipelineStageException;
+import com.youtubeagent.service.VideoQualityService;
 import com.youtubeagent.service.YoutubeUploadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +16,12 @@ public class YoutubeUploadStage implements PipelineStage {
     private static final Logger log = LoggerFactory.getLogger(YoutubeUploadStage.class);
 
     private final YoutubeUploadService youtubeUploadService;
+    private final VideoQualityService videoQualityService;
 
-    public YoutubeUploadStage(YoutubeUploadService youtubeUploadService) {
+    public YoutubeUploadStage(YoutubeUploadService youtubeUploadService,
+                               VideoQualityService videoQualityService) {
         this.youtubeUploadService = youtubeUploadService;
+        this.videoQualityService = videoQualityService;
     }
 
     @Override
@@ -33,6 +37,16 @@ public class YoutubeUploadStage implements PipelineStage {
             if (video.getFilePath() == null) {
                 throw new PipelineStageException(name(), "No video file to upload");
             }
+
+            VideoQualityService.QualityResult quality = videoQualityService.checkVideo(video.getFilePath());
+            if (!quality.valid()) {
+                log.warn("Video quality check failed: {}", quality.message());
+                throw new PipelineStageException(name(), "Video quality check failed: " + quality.message());
+            }
+
+            log.info("Video quality OK: {}s, {}x{}, {}MB",
+                    String.format("%.1f", quality.durationSeconds()),
+                    quality.width(), quality.height(), quality.fileSizeMB());
 
             YoutubeUploadService.UploadResult result = youtubeUploadService.upload(
                     video.getFilePath(),

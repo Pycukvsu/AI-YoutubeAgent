@@ -15,6 +15,7 @@ public class TrendDiscoveryConfig {
     private int minViralScore = 7;
     private boolean enableYoutubeSearch = true;
     private boolean enableOpenAiGeneration = true;
+    private boolean enableGoogleTrends = true;
 
     public int getTopicsPerRun() { return topicsPerRun; }
     public void setTopicsPerRun(int topicsPerRun) { this.topicsPerRun = topicsPerRun; }
@@ -33,4 +34,7 @@ public class TrendDiscoveryConfig {
 
     public boolean isEnableOpenAiGeneration() { return enableOpenAiGeneration; }
     public void setEnableOpenAiGeneration(boolean enableOpenAiGeneration) { this.enableOpenAiGeneration = enableOpenAiGeneration; }
+
+    public boolean isEnableGoogleTrends() { return enableGoogleTrends; }
+    public void setEnableGoogleTrends(boolean enableGoogleTrends) { this.enableGoogleTrends = enableGoogleTrends; }
 }

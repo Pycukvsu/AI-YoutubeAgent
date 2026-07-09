@@ -5,7 +5,7 @@ import com.youtubeagent.pipeline.PipelineContext;
 import com.youtubeagent.pipeline.PipelineStage;
 import com.youtubeagent.pipeline.PipelineStageException;
 import com.youtubeagent.service.FfmpegService;
-import com.youtubeagent.util.FileUtils;
+import com.youtubeagent.service.ThumbnailService;
 import com.youtubeagent.util.SubtitleGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +25,16 @@ public class VideoAssemblyStage implements PipelineStage {
 
     private final FfmpegService ffmpegService;
     private final SubtitleGenerator subtitleGenerator;
+    private final ThumbnailService thumbnailService;
 
     @Value("${pipeline.temp-dir:/tmp/youtube-agent}")
     private String tempDir;
 
-    public VideoAssemblyStage(FfmpegService ffmpegService, SubtitleGenerator subtitleGenerator) {
+    public VideoAssemblyStage(FfmpegService ffmpegService, SubtitleGenerator subtitleGenerator,
+                               ThumbnailService thumbnailService) {
         this.ffmpegService = ffmpegService;
         this.subtitleGenerator = subtitleGenerator;
+        this.thumbnailService = thumbnailService;
     }
 
     @Override
@@ -72,6 +75,16 @@ public class VideoAssemblyStage implements PipelineStage {
             }
 
             ffmpegService.assembleFull(clipsDir, context.getAudioFilePath(), srtPath, musicPath, finalOutput.toString());
+
+            String thumbnailPath = Paths.get(videoTempDir, "thumbnail.png").toString();
+            try {
+                String topic = context.getTrend() != null ? context.getTrend().getTopic() : video.getTitle();
+                thumbnailService.generateThumbnail(topic, thumbnailPath);
+                context.setThumbnailPath(thumbnailPath);
+                video.setThumbnailPath(thumbnailPath);
+            } catch (Exception e) {
+                log.warn("Thumbnail generation failed, continuing without thumbnail: {}", e.getMessage());
+            }
 
             context.setFinalVideoPath(finalOutput.toString());
             video.setFilePath(finalOutput.toString());
