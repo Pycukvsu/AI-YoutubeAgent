@@ -16,6 +16,8 @@ class OpenAiServiceTest {
 
     @Mock
     private GeminiService geminiService;
+    @Mock
+    private GroqService groqService;
 
     private OpenAiService openAiService;
 
@@ -27,7 +29,7 @@ class OpenAiServiceTest {
         config.setBaseUrl("https://api.openai.com/v1");
         config.setMaxTokens(500);
 
-        openAiService = new OpenAiService(config, geminiService, new ObjectMapper());
+        openAiService = new OpenAiService(config, geminiService, groqService, new ObjectMapper());
     }
 
     @Test

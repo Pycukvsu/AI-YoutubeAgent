@@ -21,12 +21,14 @@ public class OpenAiService {
 
     private final OpenAiConfig config;
     private final GeminiService geminiService;
+    private final GroqService groqService;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    public OpenAiService(OpenAiConfig config, GeminiService geminiService, ObjectMapper objectMapper) {
+    public OpenAiService(OpenAiConfig config, GeminiService geminiService, GroqService groqService, ObjectMapper objectMapper) {
         this.config = config;
         this.geminiService = geminiService;
+        this.groqService = groqService;
         this.restTemplate = new RestTemplate();
         this.objectMapper = objectMapper;
     }
@@ -97,6 +99,12 @@ public class OpenAiService {
     }
 
     private String callAi(String prompt, int maxTokens) throws Exception {
+        if (groqService.isConfigured()) {
+            log.info("Using Groq API");
+            Map<String, Object> result = groqService.callGroq(prompt, maxTokens);
+            return (String) result.get("content");
+        }
+
         if (geminiService.isConfigured()) {
             log.info("Using Gemini API");
             Map<String, Object> result = geminiService.callGemini(prompt, maxTokens);
@@ -109,7 +117,7 @@ public class OpenAiService {
             return callOpenAiDirect(prompt, maxTokens);
         }
 
-        throw new ExternalServiceException("AI", "No AI provider configured. Set GEMINI_API_KEY or OPENAI_API_KEY.");
+        throw new ExternalServiceException("AI", "No AI provider configured. Set GROQ_API_KEY, GEMINI_API_KEY, or OPENAI_API_KEY.");
     }
 
     private String callOpenAiDirect(String prompt, int maxTokens) throws Exception {
