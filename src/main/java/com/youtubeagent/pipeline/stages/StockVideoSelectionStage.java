@@ -79,21 +79,37 @@ public class StockVideoSelectionStage implements PipelineStage {
     private String generateSearchQuery(String topic) {
         try {
             String prompt = """
-                    Для темы "%s" придумай короткий поисковый запрос на английском для поиска стоковых видео.
-                    Запрос должен описывать ВИЗУАЛЬНУЮ составляющую темы.
-                    Ответ — только текст запроса, без кавычек и лишнего.
-                    Пример: "space exploration stars" или "cooking food preparation"
+                    For the topic "%s" generate a short English search query for stock video sites.
+                    The query must describe the VISUAL aspect of the topic.
+                    Answer with ONLY the search query text, no quotes, no extra text.
+                    Example: "space stars galaxy" or "cooking kitchen food"
+                    Language: English only!
                     """.formatted(topic);
 
             Map<String, Object> response = openAiService.callOpenAi(prompt, 50);
-            String query = ((String) response.get("content")).trim().replace("\"", "");
+            String query = ((String) response.get("content")).trim().replace("\"", "").toLowerCase();
 
             log.info("Generated search query for '{}': '{}'", topic, query);
             return query;
 
         } catch (Exception e) {
-            log.warn("Failed to generate search query, using topic as-is: {}", e.getMessage());
-            return topic;
+            log.warn("Failed to generate search query, using English fallback: {}", e.getMessage());
+            return generateFallbackQuery(topic);
         }
+    }
+
+    private String generateFallbackQuery(String topic) {
+        String lower = topic.toLowerCase();
+        if (lower.contains("космос") || lower.contains("mars") || lower.contains("space")) return "space stars galaxy nebula";
+        if (lower.contains("наук") || lower.contains("science")) return "laboratory science experiment";
+        if (lower.contains("истор") || lower.contains("history")) return "ancient ruins castle history";
+        if (lower.contains("психолог") || lower.contains("psychology")) return "brain mind thinking abstract";
+        if (lower.contains("природ") || lower.contains("nature")) return "mountains ocean sunset landscape";
+        if (lower.contains("еда") || lower.contains("food") || lower.contains("рецепт")) return "cooking kitchen food preparation";
+        if (lower.contains("спорт") || lower.contains("sport")) return "athletics running sports action";
+        if (lower.contains("путешеств") || lower.contains("travel")) return "travel airplane city aerial";
+        if (lower.contains("лайфхак") || lower.contains("lifehack")) return "technology gadgets modern";
+        if (lower.contains("загадк") || lower.contains("mystery")) return "mysterious fog dark atmosphere";
+        return "abstract colorful dynamic motion";
     }
 }
