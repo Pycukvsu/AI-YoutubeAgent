@@ -1,4 +1,29 @@
+version: "3.8"
+
 services:
+  app:
+    build: .
+    container_name: youtube-agent
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/youtube_agent
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_FLYWAY_ENABLED=true
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - PEXELS_API_KEY=${PEXELS_API_KEY}
+      - YOUTUBE_CLIENT_ID=${YOUTUBE_CLIENT_ID}
+      - YOUTUBE_CLIENT_SECRET=${YOUTUBE_CLIENT_SECRET}
+      - YOUTUBE_REFRESH_TOKEN=${YOUTUBE_REFRESH_TOKEN}
+      - YOUTUBE_CHANNEL_ID=${YOUTUBE_CHANNEL_ID}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
   postgres:
     image: postgres:16-alpine
     container_name: youtube-agent-db
@@ -15,30 +40,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-  app:
-    build: .
-    container_name: youtube-agent-app
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/youtube_agent
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      PEXELS_API_KEY: ${PEXELS_API_KEY}
-      YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID}
-      YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET}
-      YOUTUBE_REFRESH_TOKEN: ${YOUTUBE_REFRESH_TOKEN}
-      YOUTUBE_CHANNEL_ID: ${YOUTUBE_CHANNEL_ID}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - ./src/main/resources/scripts:/app/scripts
-      - ./src/main/resources/music:/app/music
-      - youtube-temp:/tmp/youtube-agent
+    restart: unless-stopped
 
 volumes:
   pgdata:
-  youtube-temp:
