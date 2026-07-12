@@ -5,6 +5,7 @@ import com.youtubeagent.entity.Trend;
 import com.youtubeagent.dto.TrendDto;
 import com.youtubeagent.service.AnalyticsService;
 import com.youtubeagent.service.TrendService;
+import com.youtubeagent.service.TrendDiscoveryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +18,13 @@ public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
     private final TrendService trendService;
+    private final TrendDiscoveryService trendDiscoveryService;
 
-    public AnalyticsController(AnalyticsService analyticsService, TrendService trendService) {
+    public AnalyticsController(AnalyticsService analyticsService, TrendService trendService,
+                                TrendDiscoveryService trendDiscoveryService) {
         this.analyticsService = analyticsService;
         this.trendService = trendService;
+        this.trendDiscoveryService = trendDiscoveryService;
     }
 
     @GetMapping("/analytics/video/{videoId}")
@@ -32,6 +36,12 @@ public class AnalyticsController {
     public ResponseEntity<String> refreshAnalytics() {
         analyticsService.refreshAllAnalytics();
         return ResponseEntity.ok("Analytics refresh triggered");
+    }
+
+    @PostMapping("/trends/discover")
+    public ResponseEntity<String> discoverTrends() {
+        int discovered = trendDiscoveryService.discoverTrends();
+        return ResponseEntity.ok("Discovered " + discovered + " new trends");
     }
 
     @GetMapping("/trends")
