@@ -73,6 +73,10 @@
             </div>
             <div class="section">
                 <h2>Доступные тренды</h2>
+                <div style="margin-bottom: 10px;">
+                    <button class="btn btn-primary" onclick="discoverTrends()">Найти тренды</button>
+                    <button class="btn btn-secondary" onclick="addTrend()">Добавить тренд</button>
+                </div>
                 <div id="trendsList"><div class="loading">Загрузка...</div></div>
             </div>
         </div>
@@ -223,6 +227,33 @@
                 });
                 alert('Тест создан!');
                 loadAbTests();
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        }
+
+        async function discoverTrends() {
+            try {
+                const r = await fetch(API + '/api/trends/discover', { method: 'POST' });
+                const text = await r.text();
+                alert(text);
+                loadTrends();
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        }
+
+        async function addTrend() {
+            const topic = prompt('Введите тему тренда:');
+            if (!topic) return;
+            try {
+                await fetch(API + '/api/trends', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({topic: topic, source: 'manual'})
+                });
+                alert('Тренд добавлен: ' + topic);
+                loadTrends();
             } catch (e) {
                 alert('Ошибка: ' + e.message);
             }
