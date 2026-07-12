@@ -52,10 +52,17 @@ public class FfmpegService {
         cmd.add(config.getPath());
         cmd.add("-y");
 
+        int targetWidth = config.getWidth();
+        int targetHeight = config.getHeight();
+
         for (int i = 0; i < clipPaths.size(); i++) {
             cmd.add("-i");
             cmd.add(clipPaths.get(i));
-            filterBuilder.append("[").append(i).append(":v]");
+            filterBuilder.append("[").append(i).append(":v]scale=")
+                    .append(targetWidth).append(":").append(targetHeight)
+                    .append(":force_original_aspect_ratio=decrease,pad=")
+                    .append(targetWidth).append(":").append(targetHeight)
+                    .append(":(ow-iw)/2:(oh-ih)/2:black");
         }
 
         filterBuilder.append("concat=n=").append(clipPaths.size()).append(":v=1:a=0[outv]");
