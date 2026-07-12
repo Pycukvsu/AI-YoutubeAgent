@@ -40,10 +40,16 @@
         .btn-primary:hover { background: #cc0000; }
         .btn-secondary { background: #333; color: #fff; }
         .btn-secondary:hover { background: #444; }
+        .btn-danger { background: #ff5252; color: #fff; }
+        .btn-danger:hover { background: #d32f2f; }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
         .actions { display: flex; gap: 10px; margin-bottom: 20px; }
         .loading { text-align: center; padding: 40px; color: #888; }
         .empty { text-align: center; padding: 40px; color: #666; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .trend-row { position: relative; }
+        .trend-row .delete-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s; }
+        .trend-row:hover .delete-btn { opacity: 1; }
         @media (max-width: 768px) { .stats { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -134,19 +140,18 @@
             try {
                 const r = await fetch(API + '/api/trends');
                 const trends = await r.json();
-                document.getElementById('totalTrends').textContent = trends.length;
 
                 if (trends.length === 0) {
-                    document.getElementById('trendsList').innerHTML = '<div class="empty">Нет трендов. Запустите обнаружение.</div>';
+                    document.getElementById('trendsList').innerHTML = '<div class="empty">Нет трендов. Нажмите "Найти тренды".</div>';
                     return;
                 }
 
-                const html = '<table><tr><th>Тема</th><th>Источник</th><th>Категория</th><th>Статус</th></tr>' +
-                    trends.map(t => `<tr>
+                const html = '<table><tr><th>Тема</th><th>Источник</th><th>Категория</th><th></th></tr>' +
+                    trends.map(t => `<tr class="trend-row">
                         <td>${t.topic}</td>
                         <td>${t.source}</td>
                         <td>${t.category || '-'}</td>
-                        <td><span class="badge ${t.status}">${t.status}</span></td>
+                        <td><button class="btn btn-danger btn-sm delete-btn" onclick="deleteTrend(${t.id}, '${t.topic.replace(/'/g, "\\'")}')">Удалить</button></td>
                     </tr>`).join('') + '</table>';
                 document.getElementById('trendsList').innerHTML = html;
             } catch (e) {
@@ -253,6 +258,16 @@
                     body: JSON.stringify({topic: topic, source: 'manual'})
                 });
                 alert('Тренд добавлен: ' + topic);
+                loadTrends();
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        }
+
+        async function deleteTrend(id, topic) {
+            if (!confirm('Удалить тренд "' + topic + '"?')) return;
+            try {
+                await fetch(API + '/api/trends/' + id, { method: 'DELETE' });
                 loadTrends();
             } catch (e) {
                 alert('Ошибка: ' + e.message);

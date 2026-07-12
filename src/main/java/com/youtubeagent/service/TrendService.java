@@ -50,6 +50,11 @@ public class TrendService {
         }
     }
 
+    public void deleteTrend(Long id) {
+        trendRepository.deleteById(id);
+        log.info("Deleted trend with id: {}", id);
+    }
+
     public Trend findOrCreateTrend(String topic, String source, String category) {
         return trendRepository.findByTopicIgnoreCaseAndStatus(topic, "new")
                 .orElseGet(() -> {

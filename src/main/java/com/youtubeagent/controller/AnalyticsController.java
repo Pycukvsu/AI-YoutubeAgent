@@ -58,6 +58,12 @@ public class AnalyticsController {
         return ResponseEntity.ok(toDto(trend));
     }
 
+    @DeleteMapping("/trends/{id}")
+    public ResponseEntity<String> deleteTrend(@PathVariable Long id) {
+        trendService.deleteTrend(id);
+        return ResponseEntity.ok("Trend deleted");
+    }
+
     private TrendDto toDto(Trend trend) {
         TrendDto dto = new TrendDto();
         dto.setId(trend.getId());
