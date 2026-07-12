@@ -46,8 +46,6 @@ public class FfmpegService {
     }
 
     public void concatenateClips(List<String> clipPaths, String outputPath) throws Exception {
-        StringBuilder filterBuilder = new StringBuilder();
-
         java.util.List<String> cmd = new java.util.ArrayList<>();
         cmd.add(config.getPath());
         cmd.add("-y");
@@ -55,16 +53,24 @@ public class FfmpegService {
         int targetWidth = config.getWidth();
         int targetHeight = config.getHeight();
 
+        StringBuilder filterBuilder = new StringBuilder();
+        java.util.List<String> scaledLabels = new java.util.ArrayList<>();
+
         for (int i = 0; i < clipPaths.size(); i++) {
             cmd.add("-i");
             cmd.add(clipPaths.get(i));
+            String label = "s" + i;
+            scaledLabels.add("[" + label + "]");
             filterBuilder.append("[").append(i).append(":v]scale=")
                     .append(targetWidth).append(":").append(targetHeight)
                     .append(":force_original_aspect_ratio=decrease,pad=")
                     .append(targetWidth).append(":").append(targetHeight)
-                    .append(":(ow-iw)/2:(oh-ih)/2:black");
+                    .append(":(ow-iw)/2:(oh-ih)/2:black[").append(label).append("];");
         }
 
+        for (String label : scaledLabels) {
+            filterBuilder.append(label);
+        }
         filterBuilder.append("concat=n=").append(clipPaths.size()).append(":v=1:a=0[outv]");
 
         cmd.add("-filter_complex");
