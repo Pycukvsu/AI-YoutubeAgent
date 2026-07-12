@@ -2,10 +2,12 @@ version: "3.8"
 
 services:
   app:
-    build: .
+    image: ghcr.io/pycukvsu/ai-youtubeagent:latest
     container_name: youtube-agent
     ports:
       - "8080:8080"
+    env_file:
+      - .env
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/youtube_agent
@@ -13,12 +15,6 @@ services:
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
       - SPRING_FLYWAY_ENABLED=true
-      - GROQ_API_KEY=${GROQ_API_KEY}
-      - PEXELS_API_KEY=${PEXELS_API_KEY}
-      - YOUTUBE_CLIENT_ID=${YOUTUBE_CLIENT_ID}
-      - YOUTUBE_CLIENT_SECRET=${YOUTUBE_CLIENT_SECRET}
-      - YOUTUBE_REFRESH_TOKEN=${YOUTUBE_REFRESH_TOKEN}
-      - YOUTUBE_CHANNEL_ID=${YOUTUBE_CHANNEL_ID}
     depends_on:
       postgres:
         condition: service_healthy
