@@ -5,7 +5,6 @@ import com.youtubeagent.exception.ExternalServiceException;
 import com.youtubeagent.util.ProcessExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -35,15 +34,12 @@ public class EdgeTtsService {
             Path output = Paths.get(outputPath);
             Files.createDirectories(output.getParent());
 
-            Path scriptPath = extractWrapperScript();
-
             String[] command = {
-                    config.getPythonPath(),
-                    scriptPath.toAbsolutePath().toString(),
-                    text,
-                    voice,
-                    rate,
-                    outputPath
+                    "edge-tts",
+                    "--voice", voice,
+                    "--rate", rate,
+                    "--text", text,
+                    "--write-media", outputPath
             };
 
             log.info("Generating TTS audio with voice '{}', output: {}", voice, outputPath);
@@ -60,19 +56,5 @@ public class EdgeTtsService {
             log.error("TTS generation failed: {}", e.getMessage());
             throw new ExternalServiceException("EdgeTTS", e);
         }
-    }
-
-    private Path extractWrapperScript() throws IOException {
-        ClassPathResource resource = new ClassPathResource(config.getWrapperScript());
-        Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "youtube-agent-tts");
-        Files.createDirectories(tempDir);
-        Path scriptPath = tempDir.resolve("edge_tts_wrapper.py");
-
-        if (!Files.exists(scriptPath)) {
-            Files.copy(resource.getInputStream(), scriptPath);
-            scriptPath.toFile().setExecutable(true);
-        }
-
-        return scriptPath;
     }
 }
