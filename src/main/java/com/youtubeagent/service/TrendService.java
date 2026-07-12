@@ -33,7 +33,9 @@ public class TrendService {
     }
 
     public Trend getBestTrend() {
-        return trendRepository.findFirstByStatusOrderBySearchVolumeDesc("new").orElse(null);
+        return trendRepository.findRandomByStatus("new").orElse(
+                trendRepository.findFirstByStatusOrderBySearchVolumeDesc("new").orElse(null)
+        );
     }
 
     public long getAvailableTrendsCount() {
