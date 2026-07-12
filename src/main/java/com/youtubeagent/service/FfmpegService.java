@@ -172,7 +172,7 @@ public class FfmpegService {
         try {
             if (Files.exists(tempDir)) {
                 Files.list(tempDir)
-                        .filter(p -> !p.toString().endsWith(".mp4") || p.getFileName().toString().equals("final.mp4"))
+                        .filter(p -> !p.getFileName().toString().equals("final.mp4"))
                         .forEach(p -> {
                             try { Files.deleteIfExists(p); } catch (Exception ignored) {}
                         });
