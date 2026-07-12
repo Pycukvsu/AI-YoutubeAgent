@@ -96,7 +96,7 @@ public class YoutubeUploadService {
             HttpHeaders uploadHeaders = new HttpHeaders();
             uploadHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             uploadHeaders.setContentLength(videoFile.length());
-            uploadHeaders.set("Content-Range", "bytes 0/" + (videoFile.length() - 1));
+            uploadHeaders.set("Content-Range", "bytes 0-" + (videoFile.length() - 1) + "/" + videoFile.length());
 
             byte[] videoBytes = java.nio.file.Files.readAllBytes(videoFile.toPath());
             HttpEntity<byte[]> uploadEntity = new HttpEntity<>(videoBytes, uploadHeaders);
