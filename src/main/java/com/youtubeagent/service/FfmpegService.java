@@ -104,7 +104,7 @@ public class FfmpegService {
         processExecutor.execute(
                 config.getPath(), "-y",
                 "-i", videoPath,
-                "-vf", "subtitles=" + escapedSrt + ":force_style='FontSize=22,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,Outline=2,Shadow=1,Alignment=2,MarginV=60'",
+                "-vf", "subtitles=" + escapedSrt + ":force_style='FontSize=16,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,Outline=1,Shadow=0,Alignment=2,MarginV=30'",
                 "-c:v", config.getVideoCodec(), "-crf", String.valueOf(config.getCrf()),
                 "-c:a", "copy",
                 outputPath
