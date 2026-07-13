@@ -177,9 +177,13 @@ public class MiniSeriesService {
                 imagePath = downloadPexelsImage(sceneDesc, outputDir);
             }
 
-            log.info("Converting image to video");
+            log.info("Converting to video");
             String clipPath = outputDir + "/clip.mp4";
-            ffmpegService.imageToVideo(imagePath, clipPath, 5.0);
+            if (imagePath.endsWith(".mp4")) {
+                ffmpegService.trimClip(imagePath, clipPath, 0, 30);
+            } else {
+                ffmpegService.imageToVideo(imagePath, clipPath, 5.0);
+            }
 
             log.info("Generating TTS audio");
             String audioPath = tempDir + "/voiceover.mp3";
