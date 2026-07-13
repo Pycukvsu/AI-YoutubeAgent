@@ -169,7 +169,13 @@ public class MiniSeriesService {
             String fullScript = hook + "\n\n" + scriptText + "\n\n" + cliffhanger;
 
             log.info("Generating scene image for episode {}", episode.get("episodeNumber"));
-            String imagePath = dalleService.generateSceneImage(sceneDesc, (String) episode.get("episodeTitle"), 1, outputDir);
+            String imagePath;
+            try {
+                imagePath = dalleService.generateSceneImage(sceneDesc, (String) episode.get("episodeTitle"), 1, outputDir);
+            } catch (Exception e) {
+                log.warn("DALL-E failed, using Pexels image: {}", e.getMessage());
+                imagePath = downloadPexelsImage(sceneDesc, outputDir);
+            }
 
             log.info("Converting image to video");
             String clipPath = outputDir + "/clip.mp4";
@@ -202,5 +208,35 @@ public class MiniSeriesService {
 
     public MiniSeries getSeries(Long id) {
         return miniSeriesRepository.findById(id).orElse(null);
+    }
+
+    private String downloadPexelsImage(String query, String outputDir) {
+        try {
+            PexelsService pexelsService = new PexelsService(null, objectMapper);
+            java.lang.reflect.Field configField = PexelsService.class.getDeclaredField("config");
+            configField.setAccessible(true);
+
+            com.youtubeagent.config.PexelsConfig pexelsConfig = new com.youtubeagent.config.PexelsConfig();
+            pexelsConfig.setApiKey(System.getenv("PEXELS_API_KEY"));
+            pexelsConfig.setBaseUrl("https://api.pexels.com");
+            pexelsConfig.setMinDurationSeconds(5);
+
+            PexelsService tempPexels = new PexelsService(pexelsConfig, objectMapper);
+            var clips = tempPexels.searchVideos(query, 1);
+            if (!clips.isEmpty()) {
+                return tempPexels.downloadClip(clips.get(0), outputDir);
+            }
+
+            clips = tempPexels.searchVideos("abstract", 1);
+            if (!clips.isEmpty()) {
+                return tempPexels.downloadClip(clips.get(0), outputDir);
+            }
+
+            throw new RuntimeException("No images found");
+
+        } catch (Exception e) {
+            log.error("Failed to download Pexels image: {}", e.getMessage());
+            throw new ExternalServiceException("Pexels", e);
+        }
     }
 }
