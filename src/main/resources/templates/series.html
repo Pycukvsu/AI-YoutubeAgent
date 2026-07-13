@@ -4,59 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мини-сериалы — YouTube Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f0f; color: #fff; }
-        .header { background: #1a1a2e; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
-        .header h1 { font-size: 24px; color: #9c27b0; }
-        .header a { color: #888; text-decoration: none; font-size: 14px; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e4e4e7; min-height: 100vh; }
+        
+        .header { 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+            padding: 20px 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .header h1 { 
+            font-size: 22px; 
+            font-weight: 700;
+            background: linear-gradient(135deg, #9c27b0 0%, #e040fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header a { color: #71717a; text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s; }
         .header a:hover { color: #fff; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 30px; }
-        .section { background: #1a1a2e; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #333; }
-        .section h2 { font-size: 18px; margin-bottom: 16px; color: #fff; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
-        .btn-primary { background: #9c27b0; color: #fff; }
-        .btn-primary:hover { background: #7b1fa2; }
-        .btn-secondary { background: #333; color: #fff; }
-        .btn-secondary:hover { background: #444; }
-        .btn-success { background: #00c853; color: #fff; }
-        .btn-success:hover { background: #00a844; }
-        .btn-sm { padding: 6px 14px; font-size: 12px; }
-        .actions { display: flex; gap: 10px; margin-bottom: 20px; }
-        .empty { text-align: center; padding: 40px; color: #666; }
-        .loading { text-align: center; padding: 40px; color: #888; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #333; }
-        th { color: #888; font-size: 12px; text-transform: uppercase; }
-        td { font-size: 14px; }
-        .badge { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-        .badge.created { background: #2196f320; color: #2196f3; }
-        .badge.generating { background: #ffc10720; color: #ffc107; }
-        .badge.completed { background: #00c85320; color: #00c853; }
-        .series-card { background: #252540; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid #444; }
-        .series-card h3 { color: #9c27b0; margin-bottom: 8px; }
-        .series-card .meta { color: #888; font-size: 13px; margin-bottom: 12px; }
-        .series-card .actions { margin-bottom: 0; }
-        .episodes-list { margin-top: 12px; }
-        .episode-item { padding: 10px 16px; background: #1a1a2e; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .episode-item .title { font-size: 14px; }
-        .episode-item .num { color: #9c27b0; font-weight: 600; margin-right: 10px; }
+        
+        .container { max-width: 1000px; margin: 0 auto; padding: 30px; }
+        
+        .actions { display: flex; gap: 12px; margin-bottom: 28px; }
+        .btn { 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 600; 
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s; 
+        }
+        .btn-purple { background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%); color: #fff; box-shadow: 0 4px 15px rgba(156,39,176,0.3); }
+        .btn-purple:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(156,39,176,0.4); }
+        .btn-secondary { background: rgba(255,255,255,0.06); color: #e4e4e7; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+        .btn-success { background: linear-gradient(135deg, #00c853 0%, #00a844 100%); color: #fff; box-shadow: 0 4px 15px rgba(0,200,83,0.3); }
+        .btn-success:hover { transform: translateY(-1px); }
+        .btn-sm { padding: 8px 16px; font-size: 12px; border-radius: 8px; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+        
+        .section { 
+            background: linear-gradient(145deg, #18181b 0%, #1a1a2e 100%); 
+            border-radius: 16px; 
+            padding: 24px; 
+            margin-bottom: 20px; 
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .section h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #fff; }
+        .empty { text-align: center; padding: 60px 40px; color: #3f3f46; }
+        
+        .series-card { 
+            background: linear-gradient(145deg, #1e1e30 0%, #252540 100%); 
+            border-radius: 16px; 
+            padding: 24px; 
+            margin-bottom: 16px; 
+            border: 1px solid rgba(156,39,176,0.15);
+            transition: border-color 0.2s;
+        }
+        .series-card:hover { border-color: rgba(156,39,176,0.3); }
+        .series-card h3 { 
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #9c27b0 0%, #e040fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .series-card .concept { color: #a1a1aa; font-size: 13px; line-height: 1.5; margin-bottom: 16px; }
+        .series-card .meta { color: #52525b; font-size: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+        
+        .badge { 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 11px; 
+            font-weight: 600;
+        }
+        .badge.created { background: rgba(33,150,243,0.15); color: #2196f3; }
+        .badge.generating { background: rgba(255,193,7,0.15); color: #ffc107; }
+        .badge.completed { background: rgba(0,200,83,0.15); color: #00c853; }
+        
+        .episodes-list { margin-top: 16px; }
+        .episode-item { 
+            padding: 14px 18px; 
+            background: rgba(255,255,255,0.02); 
+            border-radius: 10px; 
+            margin-bottom: 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .episode-item:hover { background: rgba(255,255,255,0.04); }
+        .episode-item .ep-left { display: flex; align-items: center; gap: 12px; }
+        .episode-item .num { 
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: #fff;
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700;
+        }
+        .episode-item .title { font-size: 14px; font-weight: 500; }
+        .episode-item .hook { font-size: 12px; color: #71717a; margin-top: 2px; }
+        .episode-item .status-icon { font-size: 18px; }
+        
+        .loading { text-align: center; padding: 60px 40px; color: #52525b; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Мини-сериалы</h1>
-        <a href="/">← Назад к Dashboard</a>
+        <a href="/">← Dashboard</a>
     </div>
     <div class="container">
         <div class="actions">
-            <button class="btn btn-primary" onclick="createSeries()">Создать сериал</button>
+            <button class="btn btn-purple" onclick="createSeries()">Создать сериал</button>
         </div>
-
-        <div class="section">
-            <h2>Ваши сериалы</h2>
-            <div id="seriesList"><div class="loading">Загрузка...</div></div>
-        </div>
+        <div id="seriesList"><div class="loading">Загрузка...</div></div>
     </div>
 
     <script>
@@ -66,58 +135,46 @@
             try {
                 const r = await fetch(API + '/api/series');
                 const series = await r.json();
+                if (series.length === 0) { document.getElementById('seriesList').innerHTML = '<div class="section"><div class="empty">Нет сериалов. Нажмите "Создать сериал" чтобы начать.</div></div>'; return; }
 
-                if (series.length === 0) {
-                    document.getElementById('seriesList').innerHTML = '<div class="empty">Нет сериалов. Нажмите "Создать сериал".</div>';
-                    return;
-                }
+                const html = series.map(s => {
+                    let episodesHtml = '';
+                    try {
+                        const data = JSON.parse(s.episodesJson);
+                        const episodes = data.episodes || [];
+                        episodesHtml = '<div class="episodes-list">' + episodes.map(ep => `
+                            <div class="episode-item">
+                                <div class="ep-left">
+                                    <div class="num">${ep.episode_number}</div>
+                                    <div>
+                                        <div class="title">${ep.title}</div>
+                                        <div class="hook">${ep.hook || ''}</div>
+                                    </div>
+                                </div>
+                                <div class="status-icon">${ep.episode_number <= s.currentEpisode ? '✅' : '⏳'}</div>
+                            </div>
+                        `).join('') + '</div>';
+                    } catch {}
 
-                const html = series.map(s => `
+                    return `
                     <div class="series-card">
                         <h3>${s.title}</h3>
-                        <div class="meta">${s.concept || 'Без описания'}</div>
-                        <div class="meta">Серий: ${s.currentEpisode}/${s.totalEpisodes} | <span class="badge ${s.status}">${s.status}</span></div>
-                        <div class="actions">
-                            <button class="btn btn-success btn-sm" onclick="generateEpisode(${s.id})" ${s.currentEpisode >= s.totalEpisodes ? 'disabled' : ''}>
-                                Сгенерировать серию
-                            </button>
+                        <div class="concept">${s.concept || ''}</div>
+                        <div class="meta">
+                            <span class="badge ${s.status}">${s.status}</span>
+                            <span>${s.currentEpisode}/${s.totalEpisodes} серий</span>
                         </div>
-                        <div class="episodes-list" id="episodes-${s.id}"></div>
-                    </div>
-                `).join('');
+                        <button class="btn btn-success btn-sm" onclick="generateEpisode(${s.id})" ${s.currentEpisode >= s.totalEpisodes ? 'disabled' : ''}>
+                            Сгенерировать следующую серию
+                        </button>
+                        ${episodesHtml}
+                    </div>`;
+                }).join('');
 
                 document.getElementById('seriesList').innerHTML = html;
-
-                for (const s of series) {
-                    loadEpisodes(s.id);
-                }
             } catch (e) {
-                document.getElementById('seriesList').innerHTML = '<div class="empty">Ошибка загрузки</div>';
+                document.getElementById('seriesList').innerHTML = '<div class="section"><div class="empty">Ошибка загрузки</div></div>';
             }
-        }
-
-        async function loadEpisodes(seriesId) {
-            try {
-                const r = await fetch(API + '/api/series/' + seriesId);
-                const series = await r.json();
-
-                if (!series || !series.episodesJson) return;
-
-                const data = JSON.parse(series.episodesJson);
-                const episodes = data.episodes || [];
-                const container = document.getElementById('episodes-' + seriesId);
-                if (!container || episodes.length === 0) return;
-
-                container.innerHTML = episodes.map(ep => `
-                    <div class="episode-item">
-                        <div>
-                            <span class="num">E${ep.episode_number}</span>
-                            <span class="title">${ep.title}</span>
-                        </div>
-                        <span style="color:#666;font-size:12px">${ep.episode_number <= series.currentEpisode ? '✅' : '⏳'}</span>
-                    </div>
-                `).join('');
-            } catch (e) {}
         }
 
         async function createSeries() {
@@ -125,7 +182,6 @@
             if (!topic) return;
             const episodes = prompt('Количество серий:', '5');
             if (!episodes) return;
-
             try {
                 const r = await fetch(API + '/api/series', {
                     method: 'POST',
@@ -135,20 +191,15 @@
                 const series = await r.json();
                 alert('Сериал создан: ' + series.title);
                 loadSeries();
-            } catch (e) {
-                alert('Ошибка: ' + e.message);
-            }
+            } catch (e) { alert('Ошибка: ' + e.message); }
         }
 
         async function generateEpisode(seriesId) {
             try {
                 const r = await fetch(API + '/api/series/' + seriesId + '/generate', { method: 'POST' });
-                const text = await r.text();
-                alert(text);
+                alert(await r.text());
                 loadSeries();
-            } catch (e) {
-                alert('Ошибка: ' + e.message);
-            }
+            } catch (e) { alert('Ошибка: ' + e.message); }
         }
 
         loadSeries();

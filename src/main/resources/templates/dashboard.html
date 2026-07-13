@@ -3,67 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Agent Dashboard</title>
+    <title>YouTube Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f0f; color: #fff; }
-        .header { background: #1a1a2e; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
-        .header h1 { font-size: 24px; color: #ff0000; }
-        .header .status { padding: 8px 16px; border-radius: 20px; font-size: 14px; }
-        .status.online { background: #00c853; color: #000; }
-        .status.offline { background: #ff5252; color: #fff; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e4e4e7; min-height: 100vh; }
+        
+        .header { 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+            padding: 20px 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(10px);
+        }
+        .header h1 { 
+            font-size: 22px; 
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff0000 0%, #ff6b6b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .header a { color: #71717a; text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s; }
+        .header a:hover { color: #fff; }
+        .status { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status.online { background: rgba(0,200,83,0.15); color: #00c853; border: 1px solid rgba(0,200,83,0.3); }
+        .status.offline { background: rgba(255,82,82,0.15); color: #ff5252; border: 1px solid rgba(255,82,82,0.3); }
+        
         .container { max-width: 1400px; margin: 0 auto; padding: 30px; }
-        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: #1a1a2e; border-radius: 12px; padding: 24px; border: 1px solid #333; }
-        .stat-card h3 { color: #888; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; }
-        .stat-card .value { font-size: 36px; font-weight: bold; }
-        .stat-card .value.red { color: #ff0000; }
-        .stat-card .value.green { color: #00c853; }
-        .stat-card .value.blue { color: #2196f3; }
-        .stat-card .value.yellow { color: #ffc107; }
-        .section { background: #1a1a2e; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #333; }
-        .section h2 { font-size: 18px; margin-bottom: 16px; color: #fff; }
+        
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 16px; 
+            margin-bottom: 28px; 
+        }
+        .stat-card { 
+            background: linear-gradient(145deg, #18181b 0%, #1a1a2e 100%); 
+            border-radius: 16px; 
+            padding: 24px; 
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.12); }
+        .stat-card h3 { color: #71717a; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .stat-card .value { font-size: 32px; font-weight: 700; }
+        .stat-card .value.red { background: linear-gradient(135deg, #ff0000, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-card .value.green { background: linear-gradient(135deg, #00c853, #69f0ae); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-card .value.blue { background: linear-gradient(135deg, #2196f3, #64b5f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-card .value.yellow { background: linear-gradient(135deg, #ffc107, #ffeb3b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .actions { display: flex; gap: 12px; margin-bottom: 28px; }
+        .btn { 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 600; 
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s; 
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); color: #fff; box-shadow: 0 4px 15px rgba(255,0,0,0.3); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,0,0,0.4); }
+        .btn-purple { background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%); color: #fff; box-shadow: 0 4px 15px rgba(156,39,176,0.3); }
+        .btn-purple:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(156,39,176,0.4); }
+        .btn-secondary { background: rgba(255,255,255,0.06); color: #e4e4e7; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+        .btn-success { background: linear-gradient(135deg, #00c853 0%, #00a844 100%); color: #fff; }
+        .btn-danger { background: rgba(255,82,82,0.15); color: #ff5252; border: 1px solid rgba(255,82,82,0.3); }
+        .btn-danger:hover { background: rgba(255,82,82,0.25); }
+        .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+        
+        .section { 
+            background: linear-gradient(145deg, #18181b 0%, #1a1a2e 100%); 
+            border-radius: 16px; 
+            padding: 24px; 
+            margin-bottom: 20px; 
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .section h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #fff; }
+        
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #333; }
-        th { color: #888; font-size: 12px; text-transform: uppercase; }
-        td { font-size: 14px; }
-        .badge { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-        .badge.uploaded { background: #00c85320; color: #00c853; }
-        .badge.pending { background: #ffc10720; color: #ffc107; }
-        .badge.generating { background: #2196f320; color: #2196f3; }
-        .badge.failed { background: #ff525220; color: #ff5252; }
-        .badge.new { background: #00c85320; color: #00c853; }
-        .badge.used { background: #88888820; color: #888; }
-        .badge.expired { background: #ff525220; color: #ff5252; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
-        .btn-primary { background: #ff0000; color: #fff; }
-        .btn-primary:hover { background: #cc0000; }
-        .btn-secondary { background: #333; color: #fff; }
-        .btn-secondary:hover { background: #444; }
-        .btn-danger { background: #ff5252; color: #fff; }
-        .btn-danger:hover { background: #d32f2f; }
-        .btn-sm { padding: 4px 10px; font-size: 12px; }
-        .actions { display: flex; gap: 10px; margin-bottom: 20px; }
-        .loading { text-align: center; padding: 40px; color: #888; }
-        .empty { text-align: center; padding: 40px; color: #666; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        th { color: #52525b; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { font-size: 13px; }
+        tr:hover { background: rgba(255,255,255,0.02); }
+        
+        .badge { 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 11px; 
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .badge.uploaded { background: rgba(0,200,83,0.15); color: #00c853; }
+        .badge.pending { background: rgba(255,193,7,0.15); color: #ffc107; }
+        .badge.generating { background: rgba(33,150,243,0.15); color: #2196f3; }
+        .badge.failed { background: rgba(255,82,82,0.15); color: #ff5252; }
+        .badge.new { background: rgba(0,200,83,0.15); color: #00c853; }
+        .badge.used { background: rgba(113,113,122,0.15); color: #71717a; }
+        
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .loading { text-align: center; padding: 40px; color: #52525b; }
+        .empty { text-align: center; padding: 40px; color: #3f3f46; }
+        
         .trends-scroll { max-height: 400px; overflow-y: auto; }
         .trends-scroll::-webkit-scrollbar { width: 6px; }
-        .trends-scroll::-webkit-scrollbar-track { background: #1a1a2e; border-radius: 3px; }
-        .trends-scroll::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
-        .trends-scroll::-webkit-scrollbar-thumb:hover { background: #777; }
-        .trend-row { position: relative; }
+        .trends-scroll::-webkit-scrollbar-track { background: transparent; }
+        .trends-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+        .trends-scroll::-webkit-scrollbar-thumb:hover { background: #52525b; }
+        
         .trend-row td:last-child { position: relative; }
         .delete-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s; }
         .trend-row:hover .delete-btn { opacity: 1; }
-        @media (max-width: 768px) { .stats { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } }
+        
+        a { color: #ff6b6b; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        
+        @media (max-width: 768px) { 
+            .stats { grid-template-columns: repeat(2, 1fr); } 
+            .grid-2 { grid-template-columns: 1fr; }
+            .actions { flex-wrap: wrap; }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>YouTube Agent</h1>
-        <div>
-            <a href="/series" style="margin-right:20px">Мини-сериалы</a>
+        <div class="header-right">
+            <a href="/series">Мини-сериалы</a>
             <span id="status" class="status offline">Checking...</span>
         </div>
     </div>
@@ -77,8 +151,7 @@
 
         <div class="actions">
             <button class="btn btn-primary" onclick="startPipeline()">Создать видео</button>
-            <button class="btn btn-primary" onclick="createSeries()" style="background:#9c27b0">Мини-сериал</button>
-            <button class="btn btn-secondary" onclick="createAbTest()">A/B Тест</button>
+            <button class="btn btn-purple" onclick="createAbTest()">A/B Тест</button>
             <button class="btn btn-secondary" onclick="refreshData()">Обновить</button>
         </div>
 
@@ -89,9 +162,9 @@
             </div>
             <div class="section">
                 <h2>Доступные тренды</h2>
-                <div style="margin-bottom: 10px;">
-                    <button class="btn btn-primary" onclick="discoverTrends()">Найти тренды</button>
-                    <button class="btn btn-secondary" onclick="addTrend()">Добавить тренд</button>
+                <div style="margin-bottom: 12px; display: flex; gap: 8px;">
+                    <button class="btn btn-primary btn-sm" onclick="discoverTrends()">Найти тренды</button>
+                    <button class="btn btn-secondary btn-sm" onclick="addTrend()">Добавить</button>
                 </div>
                 <div id="trendsList"><div class="loading">Загрузка...</div></div>
             </div>
@@ -101,11 +174,6 @@
             <h2>A/B Тесты</h2>
             <div id="abTestsList"><div class="loading">Загрузка...</div></div>
         </div>
-
-        <div class="section">
-            <h2>Мини-сериалы</h2>
-            <div id="seriesList"><div class="loading">Загрузка...</div></div>
-        </div>
     </div>
 
     <script>
@@ -113,7 +181,7 @@
 
         async function checkStatus() {
             try {
-                const r = await fetch(API + '/actuator/health');
+                await fetch(API + '/actuator/health');
                 document.getElementById('status').className = 'status online';
                 document.getElementById('status').textContent = 'Online';
             } catch {
@@ -128,214 +196,67 @@
                 const data = await r.json();
                 const videos = data.content || [];
                 document.getElementById('totalVideos').textContent = data.totalElements || videos.length;
-
-                if (videos.length === 0) {
-                    document.getElementById('videosList').innerHTML = '<div class="empty">Нет видео</div>';
-                    return;
-                }
-
+                if (videos.length === 0) { document.getElementById('videosList').innerHTML = '<div class="empty">Нет видео</div>'; return; }
                 let uploaded = 0;
                 const html = '<table><tr><th>Название</th><th>Статус</th><th>YouTube</th></tr>' +
                     videos.map(v => {
                         if (v.status === 'uploaded') uploaded++;
-                        return `<tr>
-                            <td>${v.title || 'Без названия'}</td>
-                            <td><span class="badge ${v.status}">${v.status}</span></td>
-                            <td>${v.youtubeUrl ? '<a href="' + v.youtubeUrl + '" target="_blank" style="color:#ff0000">Открыть</a>' : '-'}</td>
-                        </tr>`;
+                        return `<tr><td>${v.title || 'Без названия'}</td><td><span class="badge ${v.status}">${v.status}</span></td><td>${v.youtubeUrl ? '<a href="'+v.youtubeUrl+'" target="_blank">Открыть</a>' : '-'}</td></tr>`;
                     }).join('') + '</table>';
                 document.getElementById('videosList').innerHTML = html;
                 document.getElementById('uploadedVideos').textContent = uploaded;
-            } catch (e) {
-                document.getElementById('videosList').innerHTML = '<div class="empty">Ошибка загрузки</div>';
-            }
+            } catch { document.getElementById('videosList').innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
         }
 
         async function loadTrends() {
             try {
                 const r = await fetch(API + '/api/trends');
                 const trends = await r.json();
-
-                if (trends.length === 0) {
-                    document.getElementById('trendsList').innerHTML = '<div class="empty">Нет трендов. Нажмите "Найти тренды".</div>';
-                    return;
-                }
-
-                const html = '<div class="trends-scroll"><table><tr><th>Тема</th><th>Источник</th><th>Категория</th><th style="width:60px"></th></tr>' +
-                    trends.map(t => `<tr class="trend-row">
-                        <td>${t.topic}</td>
-                        <td>${t.source}</td>
-                        <td>${t.category || '-'}</td>
-                        <td style="position:relative"><button class="btn btn-danger btn-sm delete-btn" onclick="deleteTrend(${t.id}, '${t.topic.replace(/'/g, "\\'")}')">Удалить</button></td>
-                    </tr>`).join('') + '</table></div>';
+                if (trends.length === 0) { document.getElementById('trendsList').innerHTML = '<div class="empty">Нет трендов</div>'; return; }
+                const html = '<div class="trends-scroll"><table><tr><th>Тема</th><th>Источник</th><th style="width:60px"></th></tr>' +
+                    trends.map(t => `<tr class="trend-row"><td>${t.topic}</td><td>${t.source}</td><td style="position:relative"><button class="btn btn-danger btn-sm delete-btn" onclick="deleteTrend(${t.id},'${t.topic.replace(/'/g,"\\'")}')">✕</button></td></tr>`).join('') + '</table></div>';
                 document.getElementById('trendsList').innerHTML = html;
-            } catch (e) {
-                document.getElementById('trendsList').innerHTML = '<div class="empty">Ошибка загрузки</div>';
-            }
+            } catch { document.getElementById('trendsList').innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
         }
 
         async function startPipeline() {
-            try {
-                const r = await fetch(API + '/api/pipeline/start', { method: 'POST' });
-                const data = await r.json();
-                alert('Пайплайн запущен! Video ID: ' + data.videoId);
-                refreshData();
-            } catch (e) {
-                alert('Ошибка: ' + e.message);
-            }
+            try { const r = await fetch(API+'/api/pipeline/start',{method:'POST'}); const d = await r.json(); alert('Запущен! ID: '+d.videoId); refreshData(); } catch(e) { alert('Ошибка: '+e.message); }
         }
 
         async function loadAnalytics() {
-            try {
-                const r = await fetch(API + '/api/analytics/overview');
-                const data = await r.json();
-                document.getElementById('totalViews').textContent = (data.totalViews || 0).toLocaleString();
-                document.getElementById('engagementRate').textContent = (data.engagementRate || 0) + '%';
-            } catch (e) {}
+            try { const r = await fetch(API+'/api/analytics/overview'); const d = await r.json(); document.getElementById('totalViews').textContent = (d.totalViews||0).toLocaleString(); document.getElementById('engagementRate').textContent = (d.engagementRate||0)+'%'; } catch {}
         }
 
         async function loadAbTests() {
             try {
-                const r = await fetch(API + '/api/ab-tests/active');
+                const r = await fetch(API+'/api/ab-tests/active');
                 const tests = await r.json();
-
-                if (tests.length === 0) {
-                    document.getElementById('abTestsList').innerHTML = '<div class="empty">Нет активных тестов</div>';
-                    return;
-                }
-
-                const html = '<table><tr><th>Название</th><th>Тип</th><th>Статус</th><th>Действие</th></tr>' +
-                    tests.map(t => `<tr>
-                        <td>${t.name}</td>
-                        <td>${t.testType}</td>
-                        <td><span class="badge ${t.status}">${t.status}</span></td>
-                        <td><button class="btn btn-secondary" onclick="analyzeTest(${t.id})">Анализ</button></td>
-                    </tr>`).join('') + '</table>';
+                if (tests.length === 0) { document.getElementById('abTestsList').innerHTML = '<div class="empty">Нет активных тестов</div>'; return; }
+                const html = '<table><tr><th>Название</th><th>Тип</th><th>Статус</th><th></th></tr>' +
+                    tests.map(t => `<tr><td>${t.name}</td><td>${t.testType}</td><td><span class="badge ${t.status}">${t.status}</span></td><td><button class="btn btn-secondary btn-sm" onclick="analyzeTest(${t.id})">Анализ</button></td></tr>`).join('') + '</table>';
                 document.getElementById('abTestsList').innerHTML = html;
-            } catch (e) {
-                document.getElementById('abTestsList').innerHTML = '<div class="empty">Ошибка загрузки</div>';
-            }
+            } catch { document.getElementById('abTestsList').innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
         }
 
-        async function analyzeTest(testId) {
-            try {
-                const r = await fetch(API + '/api/ab-tests/' + testId + '/analyze');
-                const data = await r.json();
-                let msg = 'Тест: ' + data.name + '\nПобедитель: ' + (data.winner || '-') + '\n\n';
-                if (data.variants) {
-                    data.variants.forEach(v => {
-                        msg += v.name + ': ' + v.videoCount + ' видео, ' + v.totalViews + ' просмотров, ' + v.engagementRate + '% engagement\n';
-                    });
-                }
-                alert(msg);
-            } catch (e) {
-                alert('Ошибка анализа: ' + e.message);
-            }
-        }
+        async function analyzeTest(id) { try { const r = await fetch(API+'/api/ab-tests/'+id+'/analyze'); const d = await r.json(); let m='Тест: '+d.name+'\nПобедитель: '+(d.winner||'-')+'\n\n'; if(d.variants) d.variants.forEach(v=>{m+=v.name+': '+v.videoCount+' видео, '+v.totalViews+' просмотров\n';}); alert(m); } catch(e){alert('Ошибка: '+e.message);} }
 
         async function createAbTest() {
-            const name = prompt('Название теста:');
-            if (!name) return;
-            const variants = prompt('Варианты (через запятую):');
-            if (!variants) return;
-
-            try {
-                await fetch(API + '/api/ab-tests/title', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({name, variants: variants.split(',').map(s => s.trim())})
-                });
-                alert('Тест создан!');
-                loadAbTests();
-            } catch (e) {
-                alert('Ошибка: ' + e.message);
-            }
+            const name = prompt('Название теста:'); if(!name) return;
+            const variants = prompt('Варианты (через запятую):'); if(!variants) return;
+            try { await fetch(API+'/api/ab-tests/title',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,variants:variants.split(',').map(s=>s.trim())})}); alert('Создан!'); loadAbTests(); } catch(e){alert('Ошибка: '+e.message);}
         }
 
-        async function discoverTrends() {
-            try {
-                const r = await fetch(API + '/api/trends/discover', { method: 'POST' });
-                const text = await r.text();
-                alert(text);
-                loadTrends();
-            } catch (e) {
-                alert('Ошибка: ' + e.message);
-            }
-        }
+        async function discoverTrends() { try { const r = await fetch(API+'/api/trends/discover',{method:'POST'}); alert(await r.text()); loadTrends(); } catch(e){alert('Ошибка: '+e.message);} }
 
         async function addTrend() {
-            const topic = prompt('Введите тему тренда:');
-            if (!topic) return;
-            try {
-                await fetch(API + '/api/trends', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({topic: topic, source: 'manual'})
-                });
-                alert('Тренд добавлен: ' + topic);
-                loadTrends();
-            } catch (e) {
-                alert('Ошибка: ' + e.message);
-            }
+            const topic = prompt('Тема тренда:'); if(!topic) return;
+            try { await fetch(API+'/api/trends',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic,source:'manual'})}); alert('Добавлено!'); loadTrends(); } catch(e){alert('Ошибка: '+e.message);}
         }
 
-        async function deleteTrend(id, topic) {
-            if (!confirm('Удалить тренд "' + topic + '"?')) return;
-            try {
-                await fetch(API + '/api/trends/' + id, { method: 'DELETE' });
-                loadTrends();
-            } catch (e) {
-                alert('Ошибка: ' + e.message);
-            }
-        }
+        async function deleteTrend(id,topic) { if(!confirm('Удалить "'+topic+'"?')) return; try { await fetch(API+'/api/trends/'+id,{method:'DELETE'}); loadTrends(); } catch(e){alert('Ошибка: '+e.message);} }
 
-        async function createSeries() {
-            const topic = prompt('Тема мини-сериала:');
-            if (!topic) return;
-            const episodes = prompt('Количество серий (по умолчанию 5):', '5');
-            if (!episodes) return;
-            try {
-                const r = await fetch(API + '/api/series', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({topic, episodes: parseInt(episodes)})
-                });
-                const series = await r.json();
-                alert('Сериал создан: ' + series.title + ' (' + series.totalEpisodes + ' серий)');
-                loadSeries();
-            } catch (e) {
-                alert('Ошибка: ' + e.message);
-            }
-        }
-
-        async function loadSeries() {
-            try {
-                const r = await fetch(API + '/api/series');
-                const series = await r.json();
-                if (series.length === 0) {
-                    document.getElementById('seriesList').innerHTML = '<div class="empty">Нет сериалов</div>';
-                    return;
-                }
-                const html = '<table><tr><th>Название</th><th>Серий</th><th>Текущая</th><th>Статус</th></tr>' +
-                    series.map(s => `<tr>
-                        <td>${s.title}</td>
-                        <td>${s.totalEpisodes}</td>
-                        <td>${s.currentEpisode}</td>
-                        <td><span class="badge ${s.status}">${s.status}</span></td>
-                    </tr>`).join('') + '</table>';
-                document.getElementById('seriesList').innerHTML = html;
-            } catch (e) {
-                document.getElementById('seriesList').innerHTML = '<div class="empty">Ошибка загрузки</div>';
-            }
-        }
-
-        async function refreshData() {
-            await Promise.all([loadVideos(), loadTrends(), loadAnalytics(), loadAbTests(), loadSeries()]);
-        }
-
-        checkStatus();
-        refreshData();
-        setInterval(refreshData, 30000);
+        async function refreshData() { await Promise.all([loadVideos(),loadTrends(),loadAnalytics(),loadAbTests()]); }
+        checkStatus(); refreshData(); setInterval(refreshData, 30000);
     </script>
 </body>
 </html>
