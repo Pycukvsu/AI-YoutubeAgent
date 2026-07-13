@@ -43,4 +43,10 @@ public class MiniSeriesController {
         if (episode == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(episode);
     }
+
+    @PostMapping("/{id}/generate")
+    public ResponseEntity<String> generateEpisode(@PathVariable Long id) {
+        miniSeriesService.generateEpisodeVideo(id);
+        return ResponseEntity.ok("Episode generation started");
+    }
 }

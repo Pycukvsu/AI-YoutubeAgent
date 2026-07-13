@@ -3,14 +3,19 @@ package com.youtubeagent.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.youtubeagent.entity.MiniSeries;
+import com.youtubeagent.entity.Video;
 import com.youtubeagent.exception.ExternalServiceException;
+import com.youtubeagent.pipeline.PipelineContext;
+import com.youtubeagent.pipeline.PipelineOrchestrator;
 import com.youtubeagent.repository.MiniSeriesRepository;
+import com.youtubeagent.repository.VideoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.nio.file.Paths;
 
 @Service
 public class MiniSeriesService {
@@ -18,14 +23,26 @@ public class MiniSeriesService {
     private static final Logger log = LoggerFactory.getLogger(MiniSeriesService.class);
 
     private final OpenAiService openAiService;
+    private final DalleService dalleService;
+    private final FfmpegService ffmpegService;
+    private final EdgeTtsService edgeTtsService;
     private final MiniSeriesRepository miniSeriesRepository;
+    private final VideoRepository videoRepository;
     private final ObjectMapper objectMapper;
 
     public MiniSeriesService(OpenAiService openAiService,
+                              DalleService dalleService,
+                              FfmpegService ffmpegService,
+                              EdgeTtsService edgeTtsService,
                               MiniSeriesRepository miniSeriesRepository,
+                              VideoRepository videoRepository,
                               ObjectMapper objectMapper) {
         this.openAiService = openAiService;
+        this.dalleService = dalleService;
+        this.ffmpegService = ffmpegService;
+        this.edgeTtsService = edgeTtsService;
         this.miniSeriesRepository = miniSeriesRepository;
+        this.videoRepository = videoRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -119,6 +136,62 @@ public class MiniSeriesService {
 
         } catch (Exception e) {
             log.error("Failed to get next episode: {}", e.getMessage());
+            throw new ExternalServiceException("MiniSeries", e);
+        }
+    }
+
+    public void generateEpisodeVideo(Long seriesId) {
+        try {
+            MiniSeries series = miniSeriesRepository.findById(seriesId)
+                    .orElseThrow(() -> new ExternalServiceException("MiniSeries", "Series not found"));
+
+            Map<String, Object> episode = getNextEpisode(seriesId);
+            if (episode == null) {
+                log.info("No more episodes for series '{}'", series.getTitle());
+                return;
+            }
+
+            Video video = new Video(
+                    episode.get("seriesTitle") + " - " + episode.get("episodeTitle"),
+                    null
+            );
+            video.setDescription("Серия " + episode.get("episodeNumber") + " из " + episode.get("totalEpisodes"));
+            video = videoRepository.save(video);
+
+            String tempDir = "/tmp/youtube-agent/video_" + video.getId();
+            String outputDir = tempDir + "/scenes";
+            java.nio.file.Files.createDirectories(Paths.get(outputDir));
+
+            String sceneDesc = (String) episode.get("sceneDescription");
+            String scriptText = (String) episode.get("scriptText");
+            String hook = (String) episode.get("hook");
+            String cliffhanger = (String) episode.get("cliffhanger");
+            String fullScript = hook + "\n\n" + scriptText + "\n\n" + cliffhanger;
+
+            log.info("Generating scene image for episode {}", episode.get("episodeNumber"));
+            String imagePath = dalleService.generateSceneImage(sceneDesc, (String) episode.get("episodeTitle"), 1, outputDir);
+
+            log.info("Converting image to video");
+            String clipPath = outputDir + "/clip.mp4";
+            ffmpegService.imageToVideo(imagePath, clipPath, 5.0);
+
+            log.info("Generating TTS audio");
+            String audioPath = tempDir + "/voiceover.mp3";
+            edgeTtsService.generateAudio(fullScript, audioPath);
+
+            log.info("Assembling final video");
+            String finalPath = tempDir + "/final.mp4";
+            ffmpegService.assembleFull(outputDir, audioPath, null, null, finalPath);
+
+            video.setFilePath(finalPath);
+            video.setTitle((String) episode.get("seriesTitle") + " Эп." + episode.get("episodeNumber") + ": " + episode.get("episodeTitle"));
+            video.setStatus("assembled");
+            videoRepository.save(video);
+
+            log.info("Episode video generated: {}", finalPath);
+
+        } catch (Exception e) {
+            log.error("Failed to generate episode video: {}", e.getMessage());
             throw new ExternalServiceException("MiniSeries", e);
         }
     }
