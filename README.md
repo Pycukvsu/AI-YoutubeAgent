@@ -1,144 +1,243 @@
-# YouTube Shorts Agent
+<div align="center">
 
-Автоматизированное приложение для создания и публикации YouTube Shorts.
+# 🎬 YouTube Shorts Agent
 
-## Архитектура
+**Полностью автоматизированное приложение для создания и публикации YouTube Shorts с помощью ИИ**
 
-```
-Trend → Сценарий (OpenAI) → Озвучка (Edge TTS) → Стоковые видео (Pexels) → Монтаж (FFmpeg) → YouTube
-```
+[![Java](https://img.shields.io/badge/Java-21-orange)](https://adoptium.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4-green)](https://spring.io/projects/spring-boot)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
+[![Tests](https://img.shields.io/badge/Tests-47%20passed-brightgreen)]()
 
-## Требования
+</div>
 
-- Java 21+
-- Maven 3.9+
-- PostgreSQL 16+
-- FFmpeg
-- Python 3.10+ + `pip install edge-tts`
+---
 
-## Быстрый старт
+## 🚀 Возможности
 
-### 1. Настройка переменных окружения
+| Функция | Описание |
+|---------|----------|
+| 🎯 **Автоматические тренды** | Groq AI + YouTube Search + Google Trends |
+| 📝 **Генерация сценариев** | Groq LLM (бесплатно) с SEO-оптимизацией |
+| 🎙️ **Озвучка** | Edge TTS (бесплатно) на русском языке |
+| 🎬 **Видео** | Стоковые клипы Pexels + монтаж FFmpeg |
+| 📊 **Аналитика** | Просмотры, лайки, engagement rate |
+| 🧪 **A/B тестирование** | Тест заголовков, превью, времени публикации |
+| 🎞️ **Мини-сериалы** | Многосерийные проекты с AI-генерацией |
+| 🌐 **Дашборд** | Красивый веб-интерфейс для управления |
 
-```bash
-export OPENAI_API_KEY="sk-..."
-export PEXELS_API_KEY="..."
-export YOUTUBE_CLIENT_ID="..."
-export YOUTUBE_CLIENT_SECRET="..."
-export YOUTUBE_REFRESH_TOKEN="..."
-export YOUTUBE_CHANNEL_ID="..."
-```
+---
 
-### 2. Запуск через Docker Compose (рекомендуется)
+## ⚡ Быстрый старт
 
-```bash
-docker-compose up
-```
-
-Приложение: `http://localhost:8080`
-
-### 3. Запуск локально
-
-Создать базу данных:
+### 1. Клонируй репозиторий
 
 ```bash
-createdb youtube_agent
+git clone https://github.com/Pycukvsu/AI-YoutubeAgent.git
+cd AI-YoutubeAgent
 ```
 
-Запустить:
+### 2. Настрой API ключи
+
+Создай файл `.env`:
 
 ```bash
-mvn spring-boot:run
+GROQ_API_KEY=gsk_...          # https://console.groq.com (бесплатно)
+PEXELS_API_KEY=...            # https://www.pexels.com/api/ (бесплатно)
+YOUTUBE_CLIENT_ID=...         # https://console.cloud.google.com
+YOUTUBE_CLIENT_SECRET=...
+YOUTUBE_REFRESH_TOKEN=...
+YOUTUBE_CHANNEL_ID=...
 ```
 
-Или собрать JAR:
+### 3. Запусти через Docker
 
 ```bash
-mvn clean package -DskipTests
-java -jar target/youtube-agent-0.1.0-SNAPSHOT.jar
+docker-compose up --build
 ```
 
-## API
+### 4. Открой дашборд
 
-### Пайплайн
+🌐 **http://localhost:8080**
 
-```bash
-# Запустить генерацию видео
-curl -X POST http://localhost:8080/api/pipeline/start
+---
 
-# Статус пайплайна
-curl http://localhost:8080/api/pipeline/{runId}/status
+## 🏗️ Архитектура
 
-# Перезапустить для существующего видео
-curl -X POST http://localhost:8080/api/pipeline/start/{videoId}
 ```
+┌─────────────────────────────────────────────────────────────┐
+│                    YouTube Shorts Agent                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                               │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐               │
+│  │  Тренды   │───▶│ Сценарий │───▶│ Озвучка  │               │
+│  │  Groq AI  │    │  Groq AI │    │ Edge TTS │               │
+│  └──────────┘    └──────────┘    └──────────┘               │
+│       │              │                │                       │
+│       ▼              ▼                ▼                       │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐               │
+│  │  Поиск    │───▶│  SEO     │───▶│  FFmpeg  │               │
+│  │  Pexels   │    │  Оптим.  │    │  Монтаж  │               │
+│  └──────────┘    └──────────┘    └──────────┘               │
+│                                          │                   │
+│                                          ▼                   │
+│                                   ┌──────────┐              │
+│                                   │ YouTube  │              │
+│                                   │  Upload  │              │
+│                                   └──────────┘              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📋 API Endpoints
 
 ### Видео
-
-```bash
-# Список видео
-curl http://localhost:8080/api/videos
-
-# Детали видео
-curl http://localhost:8080/api/videos/{id}
-
-# Перезаливать на YouTube
-curl -X POST http://localhost:8080/api/videos/{id}/upload
-```
+| Метод | Endpoint | Описание |
+|-------|----------|----------|
+| `POST` | `/api/pipeline/start` | Запустить генерацию видео |
+| `GET` | `/api/videos` | Список видео |
+| `GET` | `/api/videos/{id}` | Детали видео |
 
 ### Тренды
+| Метод | Endpoint | Описание |
+|-------|----------|----------|
+| `GET` | `/api/trends` | Список трендов |
+| `POST` | `/api/trends` | Добавить тренд |
+| `POST` | `/api/trends/discover` | Поиск трендов через AI |
+| `DELETE` | `/api/trends/{id}` | Удалить тренд |
 
-```bash
-# Список трендов
-curl http://localhost:8080/api/trends
+### Мини-сериалы
+| Метод | Endpoint | Описание |
+|-------|----------|----------|
+| `POST` | `/api/series` | Создать сериал |
+| `GET` | `/api/series` | Список сериалов |
+| `GET` | `/api/series/{id}` | Детали сериала |
+| `POST` | `/api/series/{id}/generate` | Сгенерировать эпизод |
 
-# Добавить тренд
-curl -X POST http://localhost:8080/api/trends \
-  -H "Content-Type: application/json" \
-  -d '{"topic": "Интересные факты о космосе", "source": "manual"}'
-```
+### A/B Тестирование
+| Метод | Endpoint | Описание |
+|-------|----------|----------|
+| `POST` | `/api/ab-tests/title` | Тест заголовков |
+| `POST` | `/api/ab-tests/thumbnail` | Тест превью |
+| `GET` | `/api/ab-tests/{id}/analyze` | Анализ результатов |
 
 ### Аналитика
+| Метод | Endpoint | Описание |
+|-------|----------|----------|
+| `GET` | `/api/analytics/overview` | Общая статистика |
+| `GET` | `/api/analytics/video/{id}` | Статистика видео |
+| `POST` | `/api/analytics/refresh` | Обновить аналитику |
 
-```bash
-# Статистика по видео
-curl http://localhost:8080/api/analytics/video/{videoId}
+---
 
-# Обновить аналитику
-curl -X POST http://localhost:8080/api/analytics/refresh
-```
+## 🔧 Конфигурация
 
-## Автоматическое расписание
+### Переменные окружения
+
+| Переменная | Описание | Обязательна |
+|-----------|----------|-------------|
+| `GROQ_API_KEY` | API ключ Groq (бесплатно) | ✅ |
+| `PEXELS_API_KEY` | API ключ Pexels | ✅ |
+| `YOUTUBE_CLIENT_ID` | YouTube OAuth Client ID | ✅ |
+| `YOUTUBE_CLIENT_SECRET` | YouTube OAuth Client Secret | ✅ |
+| `YOUTUBE_REFRESH_TOKEN` | YouTube Refresh Token | ✅ |
+| `YOUTUBE_CHANNEL_ID` | ID YouTube канала | ✅ |
+| `DALL_E_API_KEY` | OpenAI API ключ для изображений | ❌ |
+| `OPENAI_API_KEY` | OpenAI API ключ (альтернатива Groq) | ❌ |
+
+### Автоматическое расписание
 
 | Задача | Расписание | Описание |
 |--------|-----------|----------|
-| Тренды | 06:00 ежедневно | Обновление и поиск трендов |
-| Генерация | 10:00, 14:00, 18:00 | Создание новых видео |
-| Аналитика | 02:00 ежедневно | Сбор статистики |
+| 🎯 Тренды | 06:00 | Поиск новых трендов через Groq + YouTube |
+| 🎬 Генерация | 10:00, 14:00, 18:00 | Создание новых видео |
+| 📊 Аналитика | 02:00 | Сбор статистики с YouTube |
 
-## Тесты
+---
+
+## 🧪 Тесты
 
 ```bash
 mvn test
 ```
 
-34 теста: OpenAI, EdgeTTS, Pexels, FFmpeg, YouTube, Trends, Video Management, Subtitles, Pipeline.
+**47 тестов** по 11 классам:
 
-## Структура проекта
+| Класс | Тесты | Что проверяется |
+|-------|-------|-----------------|
+| `OpenAiServiceTest` | 1 | API подключение |
+| `EdgeTtsServiceTest` | 3 | Генерация аудио |
+| `PexelsServiceTest` | 3 | Поиск и скачивание видео |
+| `FfmpegServiceTest` | 7 | Монтаж видео |
+| `YoutubeUploadServiceTest` | 4 | Загрузка на YouTube |
+| `TrendServiceTest` | 6 | Управление трендами |
+| `TrendDiscoveryServiceTest` | 4 | AI поиск трендов |
+| `VideoManagementServiceTest` | 5 | CRUD видео |
+| `SeoServiceTest` | 3 | SEO оптимизация |
+| `VideoQualityServiceTest` | 6 | Проверка качества |
+| `PipelineOrchestratorTest` | 2 | Оркестратор пайплайна |
+| `SubtitleGeneratorTest` | 3 | Генерация субтитров |
+
+---
+
+## 📁 Структура проекта
 
 ```
-src/main/java/com/youtubeagent/
-├── config/          — конфигурация (OpenAI, Pexels, YouTube, EdgeTTS, FFmpeg)
-├── entity/          — JPA сущности (Video, Script, Trend, PipelineRun, AnalyticsSnapshot)
-├── repository/      — Spring Data репозитории
-├── dto/             — запросы и ответы API
-├── pipeline/
-│   ├── PipelineStage.java      — интерфейс стадии
-│   ├── PipelineContext.java    — носитель данных между стадиями
-│   ├── PipelineOrchestrator.java — оркестратор с retry
-│   └── stages/                 — 7 стадий пайплайна
-├── service/         — бизнес-логика (OpenAI, EdgeTTS, Pexels, FFmpeg, YouTube)
-├── controller/      — REST API
-├── scheduler/       — автоматическое расписание
-└── util/            — ProcessExecutor, SubtitleGenerator, FileUtils
+AI-YotubeAgent/
+├── docker-compose.yml          # Docker конфигурация
+├── Dockerfile                  # Сборка приложения
+├── pom.xml                     # Maven зависимости
+├── .env                        # API ключи (не коммитить!)
+├── src/
+│   ├── main/
+│   │   ├── java/com/youtubeagent/
+│   │   │   ├── config/         # Конфигурация
+│   │   │   ├── entity/         # JPA сущности
+│   │   │   ├── repository/     # Spring Data репозитории
+│   │   │   ├── dto/            # DTO объекты
+│   │   │   ├── pipeline/       # Пайплайн генерации
+│   │   │   │   ├── stages/     # 7 стадий пайплайна
+│   │   │   │   ├── PipelineOrchestrator.java
+│   │   │   │   └── PipelineContext.java
+│   │   │   ├── service/        # Бизнес-логика
+│   │   │   ├── controller/     # REST API
+│   │   │   ├── scheduler/      # Автоматическое расписание
+│   │   │   └── util/           # Утилиты
+│   │   └── resources/
+│   │       ├── application.yml
+│   │       ├── templates/      # HTML шаблоны
+│   │       ├── db/migration/   # Flyway миграции
+│   │       └── scripts/        # Python скрипты
+│   └── test/                   # Unit тесты
 ```
+
+---
+
+## 🛠️ Технологии
+
+| Компонент | Технология |
+|-----------|-----------|
+| Backend | Java 21 + Spring Boot 3.4 |
+| Database | PostgreSQL + Flyway |
+| AI (сценарии) | Groq (бесплатно) |
+| AI (изображения) | OpenAI DALL-E 3 |
+| TTS (озвучка) | Edge TTS (бесплатно) |
+| Видео | Pexels API (бесплатно) |
+| Монтаж | FFmpeg |
+| YouTube | YouTube Data API v3 |
+| Docker | Docker Compose |
+
+---
+
+## 📄 Лицензия
+
+MIT License
+
+---
+
+<div align="center">
+
+**Сделано с ❤️ для автоматизации контента**
+
+</div>
