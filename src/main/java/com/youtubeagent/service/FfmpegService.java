@@ -24,6 +24,31 @@ public class FfmpegService {
         this.processExecutor = processExecutor;
     }
 
+    public void imageToVideo(String imagePath, String outputPath, double durationSeconds) throws Exception {
+        String fps = "30";
+        int totalFrames = (int) (durationSeconds * 30);
+
+        processExecutor.execute(
+                config.getPath(), "-y",
+                "-loop", "1",
+                "-i", imagePath,
+                "-vf", "scale=" + config.getWidth() + ":" + config.getHeight()
+                        + ":force_original_aspect_ratio=decrease,pad="
+                        + config.getWidth() + ":" + config.getHeight()
+                        + ":(ow-iw)/2:(oh-ih)/2:black,"
+                        + "zoompan=z='min(zoom+0.0015,1.5)':d=" + totalFrames
+                        + ":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s="
+                        + config.getWidth() + "x" + config.getHeight()
+                        + ",format=yuv420p",
+                "-t", String.valueOf(durationSeconds),
+                "-r", fps,
+                "-c:v", config.getVideoCodec(),
+                "-crf", String.valueOf(config.getCrf()),
+                outputPath
+        );
+        log.info("Converted image to video: {} -> {} ({}s)", imagePath, outputPath, durationSeconds);
+    }
+
     public String getAudioDuration(String audioPath) throws Exception {
         String output = processExecutor.execute(
                 config.getPath(), "-i", audioPath, "-show_entries", "format=duration",
