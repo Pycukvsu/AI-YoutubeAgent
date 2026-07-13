@@ -74,6 +74,7 @@
 
         <div class="actions">
             <button class="btn btn-primary" onclick="startPipeline()">Создать видео</button>
+            <button class="btn btn-primary" onclick="createSeries()" style="background:#9c27b0">Мини-сериал</button>
             <button class="btn btn-secondary" onclick="createAbTest()">A/B Тест</button>
             <button class="btn btn-secondary" onclick="refreshData()">Обновить</button>
         </div>
@@ -96,6 +97,11 @@
         <div class="section">
             <h2>A/B Тесты</h2>
             <div id="abTestsList"><div class="loading">Загрузка...</div></div>
+        </div>
+
+        <div class="section">
+            <h2>Мини-сериалы</h2>
+            <div id="seriesList"><div class="loading">Загрузка...</div></div>
         </div>
     </div>
 
@@ -280,8 +286,48 @@
             }
         }
 
+        async function createSeries() {
+            const topic = prompt('Тема мини-сериала:');
+            if (!topic) return;
+            const episodes = prompt('Количество серий (по умолчанию 5):', '5');
+            if (!episodes) return;
+            try {
+                const r = await fetch(API + '/api/series', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({topic, episodes: parseInt(episodes)})
+                });
+                const series = await r.json();
+                alert('Сериал создан: ' + series.title + ' (' + series.totalEpisodes + ' серий)');
+                loadSeries();
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
+            }
+        }
+
+        async function loadSeries() {
+            try {
+                const r = await fetch(API + '/api/series');
+                const series = await r.json();
+                if (series.length === 0) {
+                    document.getElementById('seriesList').innerHTML = '<div class="empty">Нет сериалов</div>';
+                    return;
+                }
+                const html = '<table><tr><th>Название</th><th>Серий</th><th>Текущая</th><th>Статус</th></tr>' +
+                    series.map(s => `<tr>
+                        <td>${s.title}</td>
+                        <td>${s.totalEpisodes}</td>
+                        <td>${s.currentEpisode}</td>
+                        <td><span class="badge ${s.status}">${s.status}</span></td>
+                    </tr>`).join('') + '</table>';
+                document.getElementById('seriesList').innerHTML = html;
+            } catch (e) {
+                document.getElementById('seriesList').innerHTML = '<div class="empty">Ошибка загрузки</div>';
+            }
+        }
+
         async function refreshData() {
-            await Promise.all([loadVideos(), loadTrends(), loadAnalytics(), loadAbTests()]);
+            await Promise.all([loadVideos(), loadTrends(), loadAnalytics(), loadAbTests(), loadSeries()]);
         }
 
         checkStatus();
