@@ -65,7 +65,7 @@ public class FfmpegService {
                     .append(targetWidth).append(":").append(targetHeight)
                     .append(":force_original_aspect_ratio=decrease,pad=")
                     .append(targetWidth).append(":").append(targetHeight)
-                    .append(":(ow-iw)/2:(oh-ih)/2:black,format=yuv420p[").append(label).append("];");
+                    .append(":(ow-iw)/2:(oh-ih)/2:black,format=yuv420p,setsar=1:1[").append(label).append("];");
         }
 
         for (String label : scaledLabels) {
