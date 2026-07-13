@@ -37,15 +37,16 @@ public class GroqService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(apiKey);
 
-            Map<String, Object> body = Map.of(
-                    "model", model,
-                    "messages", new Object[]{
-                            Map.of("role", "user", "content", prompt)
-                    },
-                    "temperature", 0.8,
-                    "max_tokens", maxTokens,
-                    "response_format", Map.of("type", "json_object")
-            );
+            Map<String, Object> body = new java.util.HashMap<>();
+            body.put("model", model);
+            body.put("messages", new Object[]{
+                    Map.of("role", "user", "content", prompt)
+            });
+            body.put("temperature", 0.8);
+            body.put("max_tokens", maxTokens);
+            if (prompt.toLowerCase().contains("json")) {
+                body.put("response_format", Map.of("type", "json_object"));
+            }
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
